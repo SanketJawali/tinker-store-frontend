@@ -1,21 +1,16 @@
+import { A } from "@solidjs/router";
+
 export default () => {
   return (
     <div class="navbar bg-base-100 shadow-md">
       <div class="flex-1">
-        <a class="btn btn-ghost text-2xl">Solid Store</a>
+        <A href="/" class="btn btn-ghost text-2xl cursor-pointer">Solid Store</A>
       </div>
       <div class="flex-none">
         <ul class="menu menu-horizontal px-1">
-          <li><a>Link</a></li>
-          <li>
-            <details>
-              <summary>Parent</summary>
-              <ul class="bg-base-100 rounded-t-none p-2">
-                <li><a>Link 1</a></li>
-                <li><a>Link 2</a></li>
-              </ul>
-            </details>
-          </li>
+          <li><A href="/cart">Cart</A></li>
+          <li><A href="/about">About</A></li>
+          <li><A href="/contact">Contact</A></li>
         </ul>
       </div>
     </div>

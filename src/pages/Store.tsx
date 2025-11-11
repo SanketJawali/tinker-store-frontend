@@ -1,4 +1,4 @@
-import ItemCard from "./ItemCard";
+import ItemCard from "../components/ItemCard";
 import { Item } from "../types";
 import { For } from "solid-js";
 

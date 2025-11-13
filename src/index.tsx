@@ -2,6 +2,8 @@
 import { render } from 'solid-js/web';
 import 'solid-devtools';
 import { Router, Route } from '@solidjs/router';
+import { ClerkProvider } from 'clerk-solidjs'
+import { Suspense } from 'solid-js';
 
 import Navbar from './components/Navbar';
 import Store from './pages/Store';
@@ -14,6 +16,14 @@ import Checkout from './pages/Checkout';
 
 const root = document.getElementById('root');
 
+
+// Clerk setup
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error('Missing Publishable Key')
+}
+
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   throw new Error(
     'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?',
@@ -23,22 +33,26 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 const Layout = (props: any) => {
   return (
     <>
-      <Navbar />
-      {props.children}
-      <Footer />
+      <Suspense>
+        <Navbar />
+        {props.children}
+        <Footer />
+      </Suspense>
     </>
   )
 }
 
 render(() =>
   <>
-    <Router root={Layout}>
-      <Route path="/" component={Store} />
-      <Route path="/about" component={About} />
-      <Route path="/contact" component={Contact} />
-      <Route path="/cart" component={Cart} />
-      <Route path="/item/{id}" component={ItemInfo} />
-      <Route path="/checkout" component={Checkout} />
-    </Router>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <Router root={Layout}>
+        <Route path="/" component={Store} />
+        <Route path="/about" component={About} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/cart" component={Cart} />
+        <Route path="/item/{id}" component={ItemInfo} />
+        <Route path="/checkout" component={Checkout} />
+      </Router>
+    </ClerkProvider>
   </>
   , root!);

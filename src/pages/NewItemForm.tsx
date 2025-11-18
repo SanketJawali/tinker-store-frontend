@@ -173,7 +173,7 @@ export default () => {
       }
 
       const data = await res.json();
-      console.log("Product created:", data);
+      alert("Product Added!");
 
     } catch (err) {
       console.error("Request error:", err);

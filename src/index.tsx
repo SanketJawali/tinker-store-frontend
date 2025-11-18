@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Cart from './pages/Cart';
+import NewItemForm from './pages/NewItemForm';
 import ItemInfo from './pages/ItemInfo';
 import Checkout from './pages/Checkout';
 
@@ -51,6 +52,7 @@ render(() =>
         <Route path="/contact" component={Contact} />
         <Route path="/cart" component={Cart} />
         <Route path="/item/{id}" component={ItemInfo} />
+        <Route path="/new-item" component={NewItemForm} />
         <Route path="/checkout" component={Checkout} />
       </Router>
     </ClerkProvider>

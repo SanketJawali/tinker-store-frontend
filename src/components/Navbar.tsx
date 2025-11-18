@@ -24,6 +24,7 @@ export default () => {
               <li><A href="/cart">Cart</A></li>
               <li><A href="/about">About</A></li>
               <li><A href="/contact">Contact</A></li>
+              <li><A href="/new-item">Add Item</A></li>
               <li><UserButton /></li>
             </ul>
           </SignedIn>

@@ -8,6 +8,7 @@ export default (props: Item) => {
           src={props.imgSrc}
           alt={props.imgAlt} />
       </figure>
+
       <div class="card-body">
         <h2 class="card-title">{props.title}</h2>
         <h2 class="card-title">₹ {props.price}</h2>

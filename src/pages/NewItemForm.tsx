@@ -23,6 +23,8 @@ export default () => {
   const [category, setCategory] = createSignal("");
   const [stock, setStock] = createSignal("");
   const [imageFile, setImageFile] = createSignal<File | null>(null);
+  const [imageUploaded, setImageUploaded] = createSignal(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = createSignal<string>("");
 
   // const publicKey = import.meta.env.IMAGE_KIT_PUBLIC_KEY;
   const publicKey = 'public_a1P1imlofZQ7XfFB/agre3Ye+uo='
@@ -67,8 +69,19 @@ export default () => {
         abortSignal: abortController.signal,
       };
 
-      const response: UploadResponse = await upload(uploadOptions);
-      console.log("Upload successful:", response);
+      if (!imageUploaded()) {
+        const uploadResponse: UploadResponse = await upload(uploadOptions);
+        setImageUploaded(true);
+        console.log("Upload successful:", uploadResponse);
+        if (uploadResponse.url) {
+          setUploadedImageUrl(uploadResponse.url);
+        } else {
+          console.error("ImageKit did not return a URL");
+        }
+      }
+      else {
+        console.log("Image already uploaded.")
+      }
 
       // If needed: store uploaded image URL
       // response.url
@@ -96,18 +109,76 @@ export default () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("name", name());
-    formData.append("description", description());
-    formData.append("price", price());
-    formData.append("category", category());
-    formData.append("stock", stock());
-    formData.append("image", imageFile()!);
+    // -------------------------
+    // 1) Upload image to ImageKit
+    // -------------------------
+    const { token, signature, expire } = await getSignature();
 
-    console.log("Submitted:", Object.fromEntries(formData));
+    const uploadOptions: UploadOptions = {
+      file: imageFile()!,
+      fileName: imageFile()!.name,
+      token,
+      signature,
+      expire,
+      publicKey
+    };
 
-    // Example:
-    // await fetch(`${backendUrl}/product`, { method: "POST", body: formData });
+    if (!imageUploaded()) {
+      console.log("Uploading image.");
+      const uploadResponse = await upload(uploadOptions);
+      setImageUploaded(true);
+      if (uploadResponse.url) {
+        setUploadedImageUrl(uploadResponse.url);
+      } else {
+        console.error("ImageKit did not return a URL");
+      }
+    }
+
+    // -------------------------
+    // 2) Build final payload for DB
+    // -------------------------
+
+    // NOTE: owner_id hardcoded for now
+    const owner_id = 1;
+
+    const payload = {
+      owner_id,
+      name: name(),
+      description: description(),
+      price: Number(price()),
+      category: category(),
+      stock: Number(stock()),
+      image_url: uploadedImageUrl()
+    };
+
+    console.log("Final Payload:", payload);
+
+    // -------------------------
+    // 3) Send POST request to backend
+    // -------------------------
+    try {
+      const res = await fetch(`${backendUrl}/api/product`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        console.error("Backend error:", error);
+        alert("Failed to create product");
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Product created:", data);
+
+    } catch (err) {
+      console.error("Request error:", err);
+      alert("Unable to reach backend.");
+    }
   };
 
   return (

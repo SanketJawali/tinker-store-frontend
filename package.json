@@ -23,6 +23,8 @@
     "@solidjs/router": "^0.15.4",
     "@tailwindcss/vite": "^4.1.17",
     "clerk-solidjs": "^2.0.10",
+    "lucide-solid": "^0.554.0",
+    "solid-icons": "^1.1.0",
     "solid-js": "^1.9.5",
     "tailwindcss": "^4.1.17"
   }

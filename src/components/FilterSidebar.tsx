@@ -1,104 +1,68 @@
-import { createSignal, For } from "solid-js";
+import { Component } from "solid-js";
+import { FilterState } from "../types";
 
-const FilterSidebar = (props: any) => {
-    // State management
-    const [priceRange, setPriceRange] = createSignal(5000);
-    const [selectedRating, setSelectedRating] = createSignal(0);
+interface SidebarProps {
+    // Pass the raw store object, do not destructure!
+    currentFilters: FilterState;
+    // The setter now accepts a key and value for easier store updates
+    onFilterChange: (key: keyof FilterState, value: any) => void;
+    onReset: () => void;
+}
 
-    const categories = [
-        "Electronics",
-        "Footwear",
-        "Clothing",
-        "Home & Kitchen",
-        "Accessories"
-    ];
-
-    const handleCategoryChange = (category: string, checked: boolean) => {
-        // Logic to update parent state or local filter list
-        console.log(`Category: ${category}, Checked: ${checked}`);
-    };
-
+const FilterSidebar: Component<SidebarProps> = (props) => {
     return (
-        <aside class="w-full md:w-64 bg-base-100 p-4 border-r border-base-300 h-full overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="font-bold text-xl text-base-content">Filters</h2>
-                <button class="btn btn-ghost btn-xs text-error">Reset</button>
+        <div class="flex flex-col gap-6">
+
+            {/* Search Input */}
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-bold">Search</span>
+                </label>
+                <input
+                    type="text"
+                    placeholder="Product name..."
+                    class="input input-bordered w-full"
+                    // Access store directly without parenthesis
+                    value={props.currentFilters.search}
+                    onInput={(e) =>
+                        props.onFilterChange("search", e.currentTarget.value)
+                    }
+                />
             </div>
 
-            {/* Categories Section */}
-            <div class="mb-6">
-                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-base-content/70">Categories</h3>
-                <div class="form-control gap-2">
-                    <For each={categories}>
-                        {(item) => (
-                            <label class="label cursor-pointer justify-start gap-3 p-0 hover:bg-base-200 rounded px-1 transition-colors">
-                                <input
-                                    type="checkbox"
-                                    class="checkbox checkbox-sm checkbox-primary rounded-md"
-                                    onChange={(e) => handleCategoryChange(item, e.currentTarget.checked)}
-                                />
-                                <span class="label-text text-base">{item}</span>
-                            </label>
-                        )}
-                    </For>
-                </div>
-            </div>
-
-            <div class="divider my-2"></div>
-
-            {/* Price Range Section */}
-            <div class="mb-6">
-                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-base-content/70">Price Range</h3>
+            {/* Price Filter */}
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-bold">Max Price</span>
+                    <span class="label-text-alt">₹ {props.currentFilters.maxPrice}</span>
+                </label>
                 <input
                     type="range"
                     min="0"
-                    max="10000"
-                    value={priceRange()}
-                    class="range range-primary range-xs"
-                    onInput={(e) => setPriceRange(e.currentTarget.value)}
+                    max="5000"
+                    step="100"
+                    class="range range-primary range-sm"
+                    value={props.currentFilters.maxPrice}
+                    // FIX: Use valueAsNumber to ensure it's not a string "100"
+                    onInput={(e) =>
+                        props.onFilterChange("maxPrice", e.currentTarget.valueAsNumber)
+                    }
                 />
-                <div class="flex justify-between items-center mt-2">
-                    <span class="text-xs text-base-content/60">₹0</span>
-                    <span class="font-bold text-sm">₹{priceRange()}</span>
+                <div class="w-full flex justify-between text-xs px-2 mt-2">
+                    <span>₹0</span>
+                    <span>₹2500</span>
+                    <span>₹5000</span>
                 </div>
             </div>
 
-            <div class="divider my-2"></div>
-
-            {/* Rating Section */}
-            <div class="mb-6">
-                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-base-content/70">Rating</h3>
-                <div class="rating rating-sm">
-                    <For each={[1, 2, 3, 4, 5]}>
-                        {(star) => (
-                            <input
-                                type="radio"
-                                name="rating-2"
-                                class="mask mask-star-2 bg-orange-400"
-                                checked={selectedRating() === star}
-                                onChange={() => setSelectedRating(star)}
-                            />
-                        )}
-                    </For>
-                    <span class="ml-2 text-sm text-base-content/70">& Up</span>
-                </div>
-            </div>
-
-            <div class="divider my-2"></div>
-
-            {/* Availability Toggle */}
-            <div class="mb-8">
-                <div class="form-control">
-                    <label class="label cursor-pointer">
-                        <span class="font-semibold text-sm uppercase tracking-wider text-base-content/70">Include Out of Stock</span>
-                        <input type="checkbox" class="toggle toggle-primary toggle-sm" />
-                    </label>
-                </div>
-            </div>
-
-            {/* Apply Button */}
-            <button class="btn btn-primary w-full">Apply Filters</button>
-        </aside>
+            {/* Reset Button */}
+            <button
+                class="btn btn-outline btn-sm mt-4"
+                onClick={props.onReset}
+            >
+                Reset Filters
+            </button>
+        </div>
     );
 };
 

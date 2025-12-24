@@ -22,39 +22,39 @@ const root = document.getElementById('root');
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 if (!PUBLISHABLE_KEY) {
-  throw new Error('Missing Publishable Key')
+    throw new Error('Missing Publishable Key')
 }
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
-  throw new Error(
-    'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?',
-  );
+    throw new Error(
+        'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?',
+    );
 }
 
 const Layout = (props: any) => {
-  return (
-    <>
-      <Suspense>
-        <Navbar />
-        {props.children}
-        <Footer />
-      </Suspense>
-    </>
-  )
+    return (
+        <>
+            <Suspense>
+                <Navbar />
+                {props.children}
+                <Footer />
+            </Suspense>
+        </>
+    )
 }
 
 render(() =>
-  <>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <Router root={Layout}>
-        <Route path="/" component={Store} />
-        <Route path="/about" component={About} />
-        <Route path="/contact" component={Contact} />
-        <Route path="/cart" component={Cart} />
-        <Route path="/item/{id}" component={ItemInfo} />
-        <Route path="/new-item" component={NewItemForm} />
-        <Route path="/checkout" component={Checkout} />
-      </Router>
-    </ClerkProvider>
-  </>
-  , root!);
+    <>
+        <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+            <Router root={Layout}>
+                <Route path="/" component={Store} />
+                <Route path="/about" component={About} />
+                <Route path="/contact" component={Contact} />
+                <Route path="/cart" component={Cart} />
+                <Route path="/product/:id" component={ItemInfo} />
+                <Route path="/new-product" component={NewItemForm} />
+                <Route path="/checkout" component={Checkout} />
+            </Router>
+        </ClerkProvider>
+    </>
+    , root!);

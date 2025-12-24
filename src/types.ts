@@ -80,10 +80,15 @@ export interface ProductListResponse {
  * Wrapper for responses that return a single product object 
  * (e.g., POST /api/product).
  */
+interface ProductWithReviews {
+    product: Product;
+    reviews: Review[];
+}
+
 export interface SingleProductResponse {
     success: true;
-    message: string;
-    data: Product;
+    message?: string;
+    data: ProductWithReviews;
 }
 
 /**

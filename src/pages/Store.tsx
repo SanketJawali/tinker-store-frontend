@@ -1,6 +1,6 @@
 import { createResource, createMemo, For, Show } from 'solid-js';
 import { createStore } from "solid-js/store"; // Import createStore
-import { FilterState, ProductListResponse, APIErrorResponse } from '../types';
+import { FilterState, ProductListResponse, APIErrorResponse, Product } from '../types';
 import ItemCard from '../components/ItemCard';
 import FilterSidebar from '../components/FilterSidebar';
 import CategoryTabs from '../components/CategoryTabs';
@@ -92,12 +92,7 @@ export default () => {
 
                     <For each={filteredProducts()}>
                         {(product) => (
-                            <ItemCard
-                                title={product.name}
-                                imgSrc={product.image_url}
-                                description={product.description}
-                                price={product.price}
-                            />
+                            <ItemCard {...product} />
                         )}
                     </For>
                 </div>

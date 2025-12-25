@@ -4,7 +4,7 @@ import { getOptimizedImageUrl, ImageKitTransformation } from '../lib/imagekit';
 
 export default (props: Product) => {
     const cardTransformations: ImageKitTransformation[] = [
-        { height: '400', width: '600', crop: 'maintain_ratio' }
+        { height: '600', width: '600', crop: 'maintain_ratio' }
     ];
 
     const imageUrl = getOptimizedImageUrl(props.image_url, cardTransformations);
@@ -16,7 +16,7 @@ export default (props: Product) => {
                 <img
                     src={imageUrl}
                     alt={props.name}
-                    class="h-56 w-full object-cover"
+                    class="w-full object-cover"
                 />
             </figure>
 

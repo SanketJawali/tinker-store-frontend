@@ -143,9 +143,9 @@ export default () => {
 
                                     <div id="section-desc" class="mt-8">
                                         <h3 class="font-bold text-lg mb-2">About this item</h3>
-                                        <A class="prose prose-sm max-w-none prose-img:rounded-xl">
+                                        <article class="prose prose-sm max-w-none prose-img:rounded-xl">
                                             <SolidMarkdown>{item.description}</SolidMarkdown>
-                                        </A>
+                                        </article>
                                     </div>
 
                                 </div>

@@ -1,4 +1,4 @@
-import { Component } from "solid-js";
+import { Component, createSignal, createEffect, onCleanup } from "solid-js";
 import { FilterState } from "../types";
 
 interface SidebarProps {
@@ -9,7 +9,31 @@ interface SidebarProps {
     onReset: () => void;
 }
 
-const FilterSidebar: Component<SidebarProps> = (props) => {
+export default (props: SidebarProps) => {
+    // Local state for the input to ensure immediate UI updates while typing
+    const [searchTerm, setSearchTerm] = createSignal(props.currentFilters.search);
+    let debounceTimer: any;
+
+    // Sync local state with prop (e.g. when Reset is clicked)
+    createEffect(() => {
+        setSearchTerm(props.currentFilters.search);
+    });
+
+    const handleSearch = (e: InputEvent) => {
+        const value = (e.currentTarget as HTMLInputElement).value;
+        setSearchTerm(value);
+
+        // Clear previous timer
+        clearTimeout(debounceTimer);
+
+        // Set new timer (Debounce 500ms)
+        debounceTimer = setTimeout(() => {
+            props.onFilterChange("search", value);
+        }, 500);
+    };
+
+    onCleanup(() => clearTimeout(debounceTimer));
+
     return (
         <div class="flex flex-col gap-6">
 
@@ -22,11 +46,8 @@ const FilterSidebar: Component<SidebarProps> = (props) => {
                     type="text"
                     placeholder="Product name..."
                     class="input input-bordered w-full"
-                    // Access store directly without parenthesis
-                    value={props.currentFilters.search}
-                    onInput={(e) =>
-                        props.onFilterChange("search", e.currentTarget.value)
-                    }
+                    value={searchTerm()}
+                    onInput={handleSearch}
                 />
             </div>
 
@@ -38,8 +59,8 @@ const FilterSidebar: Component<SidebarProps> = (props) => {
                 </label>
                 <input
                     type="range"
-                    min="0"
-                    max="5000"
+                    min="100"
+                    max="10000"
                     step="100"
                     class="range range-primary range-sm"
                     value={props.currentFilters.maxPrice}
@@ -49,9 +70,9 @@ const FilterSidebar: Component<SidebarProps> = (props) => {
                     }
                 />
                 <div class="w-full flex justify-between text-xs px-2 mt-2">
-                    <span>₹0</span>
-                    <span>₹2500</span>
+                    <span>₹100</span>
                     <span>₹5000</span>
+                    <span>₹10000</span>
                 </div>
             </div>
 
@@ -65,5 +86,3 @@ const FilterSidebar: Component<SidebarProps> = (props) => {
         </div>
     );
 };
-
-export default FilterSidebar;

@@ -1,7 +1,7 @@
 import { For } from "solid-js";
 
 // Define your categories here (or pass them as props if dynamic)
-const CATEGORIES = ["All", "Electronics", "Clothing", "Home", "Accessories"];
+const CATEGORIES = ["All", "Electronics", "Home", "Kitchen", "Sports", "Outdoors", "Books", "Media"];
 
 interface CategoryTabsProps {
     activeCategory: string;
@@ -10,16 +10,16 @@ interface CategoryTabsProps {
 
 export default function CategoryTabs(props: CategoryTabsProps) {
     return (
-        <div class="flex justify-center w-full mb-8">
+        <div class="flex justify-center w-full mb-1">
             {/* DaisyUI Tabs Boxed Style */}
-            <div role="tablist" class="tabs tabs-boxed bg-base-100 p-2 shadow-sm border border-base-200">
+            <div role="tablist" class="tabs tabs-boxed bg-base-100 p-2 shadow-sm border border-base-200 rounded-2xl">
                 <For each={CATEGORIES}>
                     {(category) => (
                         <a
                             role="tab"
                             class={`tab transition-all duration-200 ${props.activeCategory === category
-                                    ? "tab-active bg-primary text-primary-content font-bold shadow-md"
-                                    : "hover:bg-base-200"
+                                ? "tab-active bg-primary text-primary-content font-bold shadow-md rounded-lg"
+                                : "hover:bg-base-200 rounded-lg"
                                 }`}
                             onClick={() => props.onCategoryChange(category)}
                         >

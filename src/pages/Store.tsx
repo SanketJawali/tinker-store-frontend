@@ -11,6 +11,7 @@ interface FetchParams {
     search: string;
 }
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 const fetchProducts = async ({ page, search }: FetchParams) => {
     // Construct URL with query parameters
     const params = new URLSearchParams({
@@ -22,7 +23,7 @@ const fetchProducts = async ({ page, search }: FetchParams) => {
         params.append('q', search);
     }
 
-    const response = await fetch(`http://localhost:8000/api/product?${params.toString()}`);
+    const response = await fetch(`${BACKEND_URL}/api/product?${params.toString()}`);
     const data: ProductListResponse | APIErrorResponse = await response.json();
 
     if (!response.ok || !data.success) {

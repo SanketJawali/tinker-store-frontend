@@ -7,9 +7,10 @@ import ReviewSection, { Review } from '../components/Reviews';
 import { Product, SingleProductResponse } from '../types';
 
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 // --- Fetchers ---
 const fetchProduct = async (id: string): Promise<Product> => {
-    const response = await fetch(`http://localhost:8000/api/product/${id}`);
+    const response = await fetch(`${BACKEND_URL}/api/product/${id}`);
 
     if (!response.ok) {
         throw new Error(`Failed to fetch product: ${response.statusText}`);

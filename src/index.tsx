@@ -4,6 +4,7 @@ import 'solid-devtools';
 import { Router, Route } from '@solidjs/router';
 import { ClerkProvider } from 'clerk-solidjs'
 import { Suspense } from 'solid-js';
+import { Link, MetaProvider } from '@solidjs/meta'
 
 import Navbar from './components/Navbar';
 import Store from './pages/Store';

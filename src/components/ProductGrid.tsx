@@ -12,13 +12,13 @@ const ProductGrid: Component<ProductGridProps> = (props) => {
     const filteredList = () => {
         return props.products.filter((item) => {
             const categoryMatch = props.filters.category === "All" || item.category === props.filters.category.toLowerCase();
-            
+
             // CHANGE: If maxPrice is 10000, treat it as "10000+" (show everything)
             // Otherwise, strictly filter by price.
-            const priceMatch = props.filters.maxPrice >= 10000 
-                ? true 
+            const priceMatch = props.filters.maxPrice >= 10000
+                ? true
                 : item.price <= props.filters.maxPrice;
-            
+
             return categoryMatch && priceMatch;
         });
     };

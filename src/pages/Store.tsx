@@ -49,14 +49,9 @@ export default () => {
                 </div>
 
                 <div class="min-h-[600px]">
-                    {/* 
-                        CRITICAL: The Suspense boundary is HERE.
-                        When ProductGridContainer suspends, this fallback renders.
-                        The Sidebar and Header (above) remain visible.
-                    */}
                     <Suspense fallback={<ProductSkeleton />}>
-                        <ProductGridContainer 
-                            filters={filters} 
+                        <ProductGridContainer
+                            filters={filters}
                             onReset={resetFilters}
                             setLoadingState={setIsLoading}
                         />

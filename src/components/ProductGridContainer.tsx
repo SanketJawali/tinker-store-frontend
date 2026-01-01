@@ -60,16 +60,11 @@ export default (props: ContainerProps) => {
 
     return (
         <>
-            {/* 
-               Reading products() here triggers Suspense. 
-               Because this component is wrapped in Suspense inside Store.tsx,
-               the bubble stops there.
-            */}
             <Show when={products()}>
-                <ProductGrid 
-                    products={products()!} 
-                    filters={props.filters} 
-                    onReset={props.onReset} 
+                <ProductGrid
+                    products={products()!}
+                    filters={props.filters}
+                    onReset={props.onReset}
                 />
             </Show>
 

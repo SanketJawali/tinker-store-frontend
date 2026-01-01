@@ -1,8 +1,39 @@
-import { Product } from "../types";
+import { Component } from "solid-js";
+import { Product, NewCartItem } from "../types";
+import { addToCart } from "../lib/cartHelpers";
+import { useSession } from "clerk-solidjs"; // Import Hook
 import { A } from "@solidjs/router";
 import { getOptimizedImageUrl, ImageKitTransformation } from '../lib/imagekit';
 
-export default (props: Product) => {
+
+// Helper function stays the same
+async function handleAddToCart(cartItem: NewCartItem, authToken: string) {
+    console.log("Adding to cart with token:", authToken.substring(0, 10) + "...");
+    await addToCart(cartItem, authToken);
+}
+
+const ItemCard: Component<Product> = (props) => {
+    // 1. Use the hook inside the component
+    const { session } = useSession();
+
+    const onAddClick = async () => {
+        const currentSession = session();
+        if (!currentSession) {
+            alert("Please log in to add items to cart.");
+            return;
+        }
+
+        // 2. Get token asynchronously when the user CLICKS
+        const token = await currentSession.getToken();
+        
+        if (token) {
+            await handleAddToCart(
+                { product_id: props.id, quantity: 1 }, 
+                token
+            );
+        }
+    };
+
     const cardTransformations: ImageKitTransformation[] = [
         { height: '600', width: '600', crop: 'maintain_ratio' }
     ];
@@ -34,10 +65,17 @@ export default (props: Product) => {
                 </p>
 
                 <div class="card-actions justify-end mt-4">
-                    <button class="btn btn-sm btn-secondary">Add</button>
-                    <button class="btn btn-sm btn-primary">Buy Now</button>
+                    <button 
+                        class="btn btn-primary btn-sm"
+                        onClick={onAddClick} // Use our new wrapper
+                    >
+                        Add to Cart
+                    </button>
+                    {/* <button class="btn btn-secondary btn-sm">Buy Now</button> */}
                 </div>
             </div>
         </div >
     )
 }
+
+export default ItemCard;

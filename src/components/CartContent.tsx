@@ -1,8 +1,16 @@
-import { createMemo, For, Show, createResource } from "solid-js";
-import { CartListWrapper, APIErrorResponse } from "../types";
+import { createMemo, For, Show, createResource, createSignal, createEffect } from "solid-js";
+import { CartListWrapper, APIErrorResponse, CartItem } from "../types";
 import { useSession } from "clerk-solidjs";
+import { addToCart } from "../lib/cartHelpers";
+import { NewCartItem } from "../types";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
+// Helper function stays the same
+async function handleAddToCart(cartItem: NewCartItem, authToken: string) {
+    // console.log("Adding to cart with token:", authToken.substring(0, 10) + "...");
+    return await addToCart(cartItem, authToken);
+}
 
 const fetchCart = async () => {
     const { session } = useSession();
@@ -33,9 +41,33 @@ const fetchCart = async () => {
     return (data as CartListWrapper).data;
 };
 
-export default function CartContent() {
+export default () => {
+    const { session } = useSession();
+
+    const currentSession = session();
+
+    if (!currentSession) {
+        alert("Please log in to add items to cart.");
+        return;
+    }
+
+
     // Fetch cart data
-    const [cartItems, { mutate, refetch }] = createResource(fetchCart);
+    const [fetchedCartItems, { mutate, refetch }] = createResource(fetchCart);
+    const [cartItems, setCartItems] = createSignal(fetchedCartItems());
+    const [loading, setLoading] = createSignal(fetchedCartItems.loading);
+
+    createEffect(() => {
+        if (fetchedCartItems.loading === false) {
+            setLoading(false);
+        };
+        // console.log(`Is loading is changed: `, loading());
+    });
+
+    createEffect(() => {
+        setCartItems(fetchedCartItems());
+        // console.log("Cart items updated:", cartItems());
+    });
 
     // Derived State for Calculations
     const subtotal = createMemo(() => {
@@ -45,23 +77,78 @@ export default function CartContent() {
     });
 
     const tax = createMemo(() => subtotal() * 0.1); // 10% tax example
-    const total = createMemo(() => subtotal() + tax() + 10); // +$10 Shipping
+    const total = createMemo(() => subtotal() + tax() + 10); // +10 Shipping
 
     // Handlers
     const updateQuantity = async (id: number, change: number) => {
-        console.log(`Update quantity for cart_id ${id} by ${change}`);
-        // await fetch(`${BACKEND_URL}/api/cart/${id}`, { method: 'PUT', ... });
-        // refetch();
+        const token = await currentSession.getToken();
+        if (token) {
+            try {
+                const response = await handleAddToCart(
+                    { product_id: id, quantity: change },
+                    token
+                );
+
+                if (response == null) {
+                    console.error("No response from server when trying to update item from cart");
+                    throw new Error("No response from server");
+                }
+
+                if (response.success == true) {
+
+                    const prevItems = cartItems();
+                    if (prevItems == null) throw new Error("No cart item found");
+
+                    setCartItems((prevItem) => {
+                        if (prevItem == null) return prevItem;
+
+                        const updatedItems = prevItem.map(item => {
+                            if (item.cart_id === id) {
+                                return {
+                                    ...item,
+                                    quantity: item.quantity + change
+                                };
+                            }
+                            return item;
+                        }).filter(item => item.quantity > 0);
+
+                        return updatedItems;
+                    });
+                }
+
+            }
+            catch (e) {
+                console.error("Failed to update item from cart:", e);
+            }
+        }
     };
 
-    const removeItem = async (id: number) => {
-        console.log(`Remove cart_id ${id}`);
-        // TODO: await fetch(`${BACKEND_URL}/api/cart/${id}`, { method: 'DELETE' });
-        // refetch();
-    };
+    const removeItem = async (id: number, quantity: number) => {
+        const token = await currentSession.getToken();
+        if (token) {
+            try {
+                const response = await handleAddToCart(
+                    { product_id: id, quantity: quantity * -1 },
+                    token
+                )
 
+                if (response == null) {
+                    console.error("No response from server when trying to remove item from cart");
+                    throw new Error("No response from server");
+                }
+
+                if (response.success == true) {
+                    setCartItems((prevItems) => prevItems?.filter(item => item.cart_id !== id) || []);
+                }
+
+            }
+            catch (e) {
+                console.error("Failed to remove item from cart:", e);
+            }
+        };
+    }
     return (
-        <Show when={!cartItems.loading} fallback={<div class="text-center py-20"><span class="loading loading-spinner loading-lg"></span></div>}>
+        <Show when={!loading()} fallback={<div class="text-center py-20"><span class="loading loading-spinner loading-lg"></span></div>}>
             <Show
                 when={cartItems() && cartItems()!.length > 0}
                 fallback={
@@ -89,7 +176,7 @@ export default function CartContent() {
                                     {/* Details */}
                                     <div class="flex-1 text-center sm:text-left">
                                         <h3 class="font-bold text-lg">{item.name}</h3>
-                                        <p class="text-base-content/70 text-sm">Ref: {item.product_id}</p>
+                                        <p class="text-base-content/70 text-sm hidden">Ref: {item.product_id}</p>
                                         <div class="mt-2 font-semibold text-primary">
                                             ₹{item.price.toFixed(2)}
                                         </div>
@@ -115,7 +202,7 @@ export default function CartContent() {
                                     {/* Remove Button */}
                                     <button
                                         class="btn btn-ghost btn-sm text-error"
-                                        onClick={() => removeItem(item.cart_id)}
+                                        onClick={() => removeItem(item.cart_id, item.quantity)}
                                     >
                                         Remove
                                     </button>
@@ -166,3 +253,4 @@ export default function CartContent() {
         </Show>
     );
 }
+

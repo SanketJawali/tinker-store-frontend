@@ -8,7 +8,7 @@ import { getOptimizedImageUrl, ImageKitTransformation } from '../lib/imagekit';
 
 // Helper function stays the same
 async function handleAddToCart(cartItem: NewCartItem, authToken: string) {
-    console.log("Adding to cart with token:", authToken.substring(0, 10) + "...");
+    // console.log("Adding to cart with token:", authToken.substring(0, 10) + "...");
     await addToCart(cartItem, authToken);
 }
 
@@ -25,10 +25,10 @@ const ItemCard: Component<Product> = (props) => {
 
         // 2. Get token asynchronously when the user CLICKS
         const token = await currentSession.getToken();
-        
+
         if (token) {
             await handleAddToCart(
-                { product_id: props.id, quantity: 1 }, 
+                { product_id: props.id, quantity: 1 },
                 token
             );
         }
@@ -65,7 +65,7 @@ const ItemCard: Component<Product> = (props) => {
                 </p>
 
                 <div class="card-actions justify-end mt-4">
-                    <button 
+                    <button
                         class="btn btn-primary btn-sm"
                         onClick={onAddClick} // Use our new wrapper
                     >

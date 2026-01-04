@@ -113,3 +113,32 @@ export interface Item {
     price: number,
     description: string
 }
+
+
+// --- Cart Related Interfaces ---
+export interface NewCartItem {
+    product_id: number; // Changed from Number to number
+    quantity: number;   // Changed from Number to number
+}
+
+export interface NewCartItemWrapper {
+    success: boolean;
+    message: string;
+    data: NewCartItem;
+}
+
+export interface CartItem {
+    cart_id: number;
+    product_id: number;
+    name: string;
+    price: number;
+    image_url: string;
+    category: string;
+    quantity: number;
+}
+
+export interface CartListWrapper {
+    success: boolean;
+    message: string;
+    data: CartItem[];
+}

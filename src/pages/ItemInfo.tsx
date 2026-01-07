@@ -1,10 +1,12 @@
+import { useSession } from "clerk-solidjs";
 import { createResource, createSignal, Suspense, Show, For } from "solid-js";
 import { useParams } from "@solidjs/router";
 import { A } from "@solidjs/router";
 import { SolidMarkdown } from "solid-markdown";
 import { getOptimizedImageUrl, ImageKitTransformation } from '../lib/imagekit';
 import ReviewSection, { Review } from '../components/Reviews';
-import { Product, SingleProductResponse } from '../types';
+import { Product, SingleProductResponse, NewCartItem } from '../types';
+import { addToCart } from "../lib/cartHelpers";
 
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
@@ -39,14 +41,61 @@ const fetchReviews = async (id: string): Promise<Review[]> => {
     ];
 };
 
+async function handleAddToCart(cartItem: NewCartItem, authToken: string) {
+    return await addToCart(cartItem, authToken);
+}
+
 export default () => {
+    // 1. Use the hook inside the component
+    const { session } = useSession();
+
+    const [addToCartLoading, setAddToCartLoading] = createSignal<boolean>(false);
+    const [buttonMessage, setButtonMessage] = createSignal<string>("Add to Cart");
+    const [buttonColor, setButtonColor] = createSignal<string>("btn-primary");
+    const [activeTab, setActiveTab] = createSignal<"Info" | "Description" | "Reviews">("Info");
+    const [quantity, setQuantity] = createSignal<number>(1);
+
     const params = useParams();
 
     // 1. Use a function for the source to ensure reactivity to URL changes
     const [product] = createResource(() => params.id, fetchProduct);
     const [reviews] = createResource(() => params.id, fetchReviews);
 
-    const [activeTab, setActiveTab] = createSignal<"Info" | "Description" | "Reviews">("Info");
+    const onAddClick = async () => {
+        const currentSession = session();
+        if (!currentSession) {
+            alert("Please log in to add items to cart.");
+            return;
+        }
+
+        // 2. Get token asynchronously when the user CLICKS
+        const token = await currentSession.getToken();
+
+        if (token && !product.loading && product()?.id !== undefined) {
+            setAddToCartLoading(true);
+
+            // if (product == undefined || !product().id) {
+            //     return;
+            // }
+            const response = await handleAddToCart(
+                { product_id: product()!.id, quantity: quantity() },
+                token
+            );
+
+            if (response?.success === true) {
+                setButtonMessage("Added!");
+                setButtonColor("btn-success");
+                setTimeout(() => setButtonMessage("Add to Cart"), 2000);
+                setTimeout(() => setButtonColor("btn-primary"), 2000);
+            }
+            else if (response?.success === false) {
+                setButtonMessage("Error occured");
+                setButtonColor("btn-error");
+                setTimeout(() => setButtonMessage("Add to Cart"), 2000);
+                setTimeout(() => setButtonColor("btn-primary"), 2000);
+            }
+        }
+    };
 
     const getProductImage = (url: string) => {
         const transforms: ImageKitTransformation[] = [
@@ -55,24 +104,31 @@ export default () => {
         return getOptimizedImageUrl(url, transforms);
     };
 
-    const scrollToSection = (id: string, tabName: typeof activeTab) => {
-        setActiveTab(tabName());
+    const scrollToSection = (id: string, tabName: () => "Info" | "Description" | "Reviews") => {
         const el = document.getElementById(id);
         if (el) {
-            const y = el.getBoundingClientRect().top + window.scrollY - 100;
-            window.scrollTo({ top: y, behavior: 'smooth' });
+            const offset = 100; // Adjust for sticky header
+            const bodyRect = document.body.getBoundingClientRect().top;
+            const elementRect = el.getBoundingClientRect().top;
+            const elementPosition = elementRect - bodyRect;
+            const offsetPosition = elementPosition - offset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
+            setActiveTab(tabName());
         }
     };
 
     return (
-        <div class="min-h-screen bg-base-100 pb-20">
-
-            {/* Sticky Nav */}
-            <div class="sticky top-16 z-30 bg-base-100/95 backdrop-blur border-b border-base-200 shadow-sm">
-                <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 flex gap-2 overflow-x-auto no-scrollbar">
+        <div class="min-h-screen bg-base-200 pb-24 lg:pb-10">
+            {/* Desktop Navigation Tabs */}
+            <div class="sticky top-16 z-30 bg-base-100/90 backdrop-blur border-b border-base-200 shadow-sm hidden lg:block">
+                <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 flex gap-2">
                     <button
                         class={`btn btn-sm rounded-full ${activeTab() === 'Info' ? 'btn-neutral' : 'btn-ghost'}`}
-                        onClick={() => scrollToSection('section-info', () => 'Info')}
+                        onClick={() => scrollToSection('section-top', () => 'Info')}
                     >
                         Overview
                     </button>
@@ -91,7 +147,7 @@ export default () => {
                 </div>
             </div>
 
-            <div class="max-w-7xl mx-auto p-4 lg:p-8">
+            <div class="max-w-7xl mx-auto p-4 lg:p-8" id="section-top">
                 <Suspense fallback={<ProductSkeleton />}>
                     <Show when={product.error}>
                         <div class="alert alert-error">
@@ -101,93 +157,128 @@ export default () => {
 
                     <Show when={product()} keyed>
                         {(item) => (
-                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
+                            <div class="flex flex-col gap-6">
 
-                                {/* Left Column: Image */}
-                                <div class="lg:col-span-5">
-                                    <div class="sticky top-24 border border-base-200 rounded-xl bg-white p-4 shadow-sm flex justify-center items-center">
-                                        <img
-                                            src={getProductImage(item.image_url)}
-                                            alt={item.name}
-                                            class="max-h-[500px] w-auto object-contain"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Middle Column: Details */}
-                                <div class="lg:col-span-4 flex flex-col gap-4" id="section-info">
-                                    <div class="text-sm breadcrumbs text-base-content/60">
-                                        <ul>
-                                            <li><A href="/">Home</A></li>
-                                            <li><A href={`/search?category=${item.category}`}>{item.category}</A></li>
-                                            <li>{item.name}</li>
-                                        </ul>
+                                {/* Top Section: Image and Buy Box */}
+                                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
+                                    
+                                    {/* Left Column: Image */}
+                                    <div class="lg:col-span-7">
+                                        <div class="sticky top-32 bg-base-100 rounded-2xl p-4 shadow-sm border border-base-300 flex justify-center items-center overflow-hidden">
+                                            <img
+                                                src={getProductImage(item.image_url)}
+                                                alt={item.name}
+                                                class="w-full h-auto max-h-[500px] object-contain hover:scale-105 transition-transform duration-500"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <h1 class="text-3xl font-bold leading-tight">{item.name}</h1>
-                                    <p class="text-sm text-base-content/60">Sold by User #{item.owner_id}</p>
-
-                                    <div class="divider my-1"></div>
-
-                                    <div class="flex items-baseline gap-2">
-                                        <span class="text-3xl font-bold text-base-content">₹{item.price}</span>
-                                        <span class="text-sm text-base-content/60">Inclusive of all taxes</span>
-                                    </div>
-
-                                    <div class="bg-base-200/50 p-4 rounded-lg mt-2 text-sm grid grid-cols-2 gap-y-2">
-                                        <span class="font-bold opacity-70">Category</span> <span>{item.category}</span>
-                                        <span class="font-bold opacity-70">Stock</span>
-                                        <span class={item.stock > 0 ? "text-success font-bold" : "text-error font-bold"}>
-                                            {item.stock > 0 ? "In Stock" : "Out of Stock"}
-                                        </span>
-                                    </div>
-
-                                    <div id="section-desc" class="mt-8">
-                                        <h3 class="font-bold text-lg mb-2">About this item</h3>
-                                        <article class="prose prose-sm max-w-none prose-img:rounded-xl">
-                                            <SolidMarkdown>{item.description}</SolidMarkdown>
-                                        </article>
-                                    </div>
-
-                                </div>
-
-                                {/* Right Column: Buy Box */}
-                                <div class="lg:col-span-3">
-                                    <div class="sticky top-24 card bg-base-100 border border-base-300 shadow-xl">
-                                        <div class="card-body p-5">
-                                            <h3 class="text-xl font-bold">₹{item.price.toLocaleString()}</h3>
-                                            <div class="text-success text-lg font-medium mt-4">
-                                                {item.stock > 0 ? 'In Stock' : 'Currently Unavailable'}
+                                    {/* Right Column: Buy Box */}
+                                    <div class="lg:col-span-5">
+                                        <div class="sticky top-32 flex flex-col gap-6">
+                                            <div class="text-sm breadcrumbs text-base-content/60 px-1">
+                                                <ul>
+                                                    <li><A href="/">Home</A></li>
+                                                    <li><A href={`/search?category=${item.category}`}>{item.category}</A></li>
+                                                    <li><span class="truncate max-w-[150px]">{item.name}</span></li>
+                                                </ul>
                                             </div>
 
-                                            <div class="form-control w-full mt-4">
-                                                <label class="label"><span class="label-text">Quantity</span></label>
-                                                <select class="select select-bordered select-sm w-full">
-                                                    <For each={[1, 2, 3, 4, 5]}>{(n) => <option value={n}>{n}</option>}</For>
-                                                </select>
+                                            <div>
+                                                <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-2">{item.name}</h1>
+                                                <div class="flex items-center gap-2 text-sm text-base-content/60">
+                                                    <span>Sold by User #{item.owner_id}</span>
+                                                    <span>•</span>
+                                                    <span class="text-success font-medium">Verified Seller</span>
+                                                </div>
                                             </div>
 
-                                            <div class="flex flex-col gap-3 mt-6">
-                                                <button class="btn btn-primary w-full rounded-full shadow-md" disabled={item.stock <= 0}>
-                                                    Add to Cart
-                                                </button>
-                                                <button class="btn btn-secondary w-full rounded-full shadow-md" disabled={item.stock <= 0}>
-                                                    Buy Now
-                                                </button>
+                                            <div class="flex flex-col gap-2 p-4 bg-base-100 rounded-xl border border-base-300 shadow-sm">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-3xl font-bold text-primary">₹{item.price.toLocaleString()}</span>
+                                                    <div class={`badge ${item.stock > 0 ? 'badge-success badge-outline' : 'badge-error badge-outline'} gap-1 font-bold`}>
+                                                        {item.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                                                    </div>
+                                                </div>
+                                                <span class="text-xs text-base-content/60">Inclusive of all taxes</span>
+                                            </div>
+
+                                            {/* Desktop Buy Options */}
+                                            <div class="hidden lg:block card bg-base-100 border border-base-300 shadow-xl overflow-hidden">
+                                                <div class="card-body p-6 gap-6">
+                                                    <div>
+                                                         <h3 class="text-2xl font-bold">₹{item.price.toLocaleString()}</h3>
+                                                         <p class="text-success text-sm font-medium mt-1">Free Delivery available</p>
+                                                    </div>
+
+                                                    <div class="form-control w-full">
+                                                        <label class="label p-0 mb-2"><span class="label-text font-semibold">Quantity</span></label>
+                                                        <select class="select select-bordered w-full" onChange={(q) => setQuantity(Number(q.target.value))} value={quantity()}>
+                                                            <For each={[1, 2, 3, 4, 5]}>{(n) => <option value={n}>{n}</option>}</For>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="flex flex-col gap-3">
+                                                        <button
+                                                            class={`btn btn-lg w-full rounded-xl ${buttonColor()}`}
+                                                            onClick={onAddClick}
+                                                            disabled={addToCartLoading() || item.stock <= 0}
+                                                        >
+                                                            {addToCartLoading() ? <span class="loading loading-spinner"></span> : buttonMessage()}
+                                                        </button>
+                                                        <button class="btn btn-secondary w-full rounded-xl" disabled={item.stock <= 0}>
+                                                            Buy Now
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <ReviewSection reviews={reviews() || []} loading={reviews.loading} />
+                                {/* Full Width Description Section Below */}
+                                <div id="section-desc" class="mt-8 pt-8 border-t-2 border-base-300">
+                                    <h2 class="font-bold text-2xl mb-6 text-primary">Product Description</h2>
+                                    <div class="bg-base-100 rounded-2xl p-6 border border-base-300 shadow-sm">
+                                        <article class="prose prose-sm lg:prose-base w-full max-w-none prose-img:rounded-xl">
+                                            <SolidMarkdown>{item.description}</SolidMarkdown>
+                                        </article>
+                                    </div>
+                                </div>
+                                
+                                {/* Reviews Section Full Width */}
+                                <div id="section-reviews" class="mt-8">
+                                     <ReviewSection reviews={reviews() || []} loading={reviews.loading} />
+                                </div>
                             </div>
                         )}
                     </Show>
                 </Suspense>
             </div>
+
+            {/* Mobile Sticky Buy Bar */}
+             <Suspense>
+                <Show when={product()}>
+                    {(item) => (
+                        <div class="fixed bottom-0 left-0 right-0 bg-base-100 p-3 px-4 border-t border-base-200 z-50 lg:hidden shadow-[0_-5px_20px_rgba(0,0,0,0.1)] flex items-center gap-4 safe-bottom">
+                            <div class="flex flex-col">
+                                <span class="text-xs text-base-content/60 font-medium">Total Price</span>
+                                <span class="text-xl font-bold text-primary">₹{item().price}</span>
+                            </div>
+                            <button 
+                                class="btn btn-primary flex-1 rounded-full shadow-lg"
+                                onClick={onAddClick}
+                                disabled={addToCartLoading() || item().stock <= 0}
+                            >
+                                {addToCartLoading() ? <span class="loading loading-spinner loading-xs"></span> : buttonMessage()}
+                            </button>
+                        </div>
+                    )}
+                </Show>
+            </Suspense>
         </div>
     );
-}
+};
 
 const ProductSkeleton = () => (
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-pulse">

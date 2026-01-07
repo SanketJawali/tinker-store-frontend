@@ -229,13 +229,13 @@ export default () => {
     );
 
     return (
-        <div class="min-h-screen bg-base-200 flex justify-center items-center py-8 px-4 sm:px-6 lg:px-8">
-            <div class="card lg:card-side bg-base-100 shadow-xl max-w-5xl w-full overflow-hidden">
+        <div class="min-h-screen bg-base-200 flex justify-center items-start lg:items-center py-4 lg:py-8 px-4 sm:px-6 lg:px-8">
+            <div class="card lg:card-side bg-base-100 shadow-xl max-w-5xl w-full overflow-hidden rounded-2xl">
 
                 {/* Left Panel: Image Upload & Preview */}
-                <div class="w-full lg:w-5/12 bg-base-200/50 p-8 flex flex-col border-b lg:border-b-0 lg:border-r border-base-300">
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-bold text-base-content">Product Image</h2>
+                <div class="w-full lg:w-5/12 bg-base-200/50 p-4 lg:p-8 flex flex-col border-b lg:border-b-0 lg:border-r border-base-300">
+                    <div class="mb-4 lg:mb-6">
+                        <h2 class="text-xl lg:text-2xl font-bold text-base-content">Product Image</h2>
                         <p class="text-sm text-base-content/60 mt-1">Upload a high-quality image to showcase your product.</p>
                     </div>
 

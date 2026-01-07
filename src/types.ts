@@ -117,6 +117,7 @@ export interface Item {
 
 // --- Cart Related Interfaces ---
 export interface NewCartItem {
+    cart_id?: number;
     product_id: number; // Changed from Number to number
     quantity: number;   // Changed from Number to number
 }

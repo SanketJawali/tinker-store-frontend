@@ -24,12 +24,17 @@ const ProductGrid: Component<ProductGridProps> = (props) => {
     };
 
     return (
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 content-start">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 content-start">
             <Show when={filteredList().length === 0}>
-                <div class="col-span-full text-center py-12">
-                    <h3 class="text-lg font-bold">No products found</h3>
-                    <p class="text-base-content/70">Try adjusting your filters or search query.</p>
-                    <button class="btn btn-link" onClick={props.onReset}>Clear filters</button>
+                <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center">
+                    <div class="w-20 h-20 bg-base-200 rounded-full flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">No products found</h3>
+                    <p class="text-base-content/60 mb-4 max-w-sm">We couldn't find any products matching your criteria. Try adjusting your filters.</p>
+                    <button class="btn btn-primary btn-sm" onClick={props.onReset}>Clear All Filters</button>
                 </div>
             </Show>
 

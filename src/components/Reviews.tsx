@@ -9,8 +9,6 @@ interface ReviewSectionProps {
 }
 
 export default function ReviewSection(props: ReviewSectionProps) {
-    const avgRatingGroupName = `avg-rating-${Math.random().toString(36).slice(2)}`;
-
     // Calculate rating distribution and average
     const ratingStats = createMemo(() => {
         const reviews = props.reviews || [];
@@ -29,25 +27,44 @@ export default function ReviewSection(props: ReviewSectionProps) {
             };
         }
 
-        // Count reviews by rating
+        // Count reviews by rating (ignore invalid ratings)
         const counts = [0, 0, 0, 0, 0]; // indices 0-4 for ratings 1-5
         let totalRating = 0;
+        let validCount = 0;
 
-        reviews.forEach(review => {
-            const ratingIndex = Math.max(0, Math.min(4, review.rating - 1));
+        reviews.forEach((review) => {
+            const rating = Number(review.rating);
+            if (!Number.isFinite(rating) || rating < 1 || rating > 5) return;
+
+            const ratingIndex = rating - 1;
             counts[ratingIndex]++;
-            totalRating += review.rating;
+            totalRating += rating;
+            validCount++;
         });
 
-        const average = totalRating / reviews.length;
+        if (validCount === 0) {
+            return {
+                average: 0,
+                count: reviews.length,
+                distribution: [
+                    { label: "5 star", count: 0, pct: 0 },
+                    { label: "4 star", count: 0, pct: 0 },
+                    { label: "3 star", count: 0, pct: 0 },
+                    { label: "2 star", count: 0, pct: 0 },
+                    { label: "1 star", count: 0, pct: 0 }
+                ]
+            };
+        }
+
+        const average = totalRating / validCount;
         
         // Calculate percentages
         const distribution = [
-            { label: "5 star", count: counts[4], pct: Math.round((counts[4] / reviews.length) * 100) },
-            { label: "4 star", count: counts[3], pct: Math.round((counts[3] / reviews.length) * 100) },
-            { label: "3 star", count: counts[2], pct: Math.round((counts[2] / reviews.length) * 100) },
-            { label: "2 star", count: counts[1], pct: Math.round((counts[1] / reviews.length) * 100) },
-            { label: "1 star", count: counts[0], pct: Math.round((counts[0] / reviews.length) * 100) }
+            { label: "5 star", count: counts[4], pct: Math.round((counts[4] / validCount) * 100) },
+            { label: "4 star", count: counts[3], pct: Math.round((counts[3] / validCount) * 100) },
+            { label: "3 star", count: counts[2], pct: Math.round((counts[2] / validCount) * 100) },
+            { label: "2 star", count: counts[1], pct: Math.round((counts[1] / validCount) * 100) },
+            { label: "1 star", count: counts[0], pct: Math.round((counts[0] / validCount) * 100) }
         ];
 
         return {
@@ -82,21 +99,62 @@ export default function ReviewSection(props: ReviewSectionProps) {
                             <div class="flex flex-col items-center lg:items-start gap-2 mb-6">
                                 <span class="text-4xl font-extrabold text-base-content">{ratingStats().average.toFixed(1)}</span>
                                 <div class="rating rating-md pointer-events-none">
-                                    <For each={Array(5).fill(0)}>
-                                        {(_, i) => {
-                                            const avgRounded = Math.round(ratingStats().average);
-                                            const selectedIndex = avgRounded > 0 ? Math.min(4, avgRounded - 1) : -1;
-                                            return (
+                                    {(() => {
+                                        const avgRounded = Math.max(0, Math.min(5, Math.round(ratingStats().average)));
+                                        const groupName = "rating-avg";
+                                        return (
+                                            <>
                                                 <input
                                                     type="radio"
-                                                    name={avgRatingGroupName}
-                                                    class="mask mask-star-2 bg-warning"
-                                                    checked={selectedIndex >= 0 && i() === selectedIndex}
-                                                    tabindex={-1}
+                                                    name={groupName}
+                                                    class="rating-hidden"
+                                                    checked={avgRounded === 0}
+                                                    disabled
+                                                    tabIndex={-1}
                                                 />
-                                            );
-                                        }}
-                                    </For>
+                                                <input
+                                                    type="radio"
+                                                    name={groupName}
+                                                    class="mask mask-star-2 bg-warning"
+                                                    checked={avgRounded === 1}
+                                                    disabled
+                                                    tabIndex={-1}
+                                                />
+                                                <input
+                                                    type="radio"
+                                                    name={groupName}
+                                                    class="mask mask-star-2 bg-warning"
+                                                    checked={avgRounded === 2}
+                                                    disabled
+                                                    tabIndex={-1}
+                                                />
+                                                <input
+                                                    type="radio"
+                                                    name={groupName}
+                                                    class="mask mask-star-2 bg-warning"
+                                                    checked={avgRounded === 3}
+                                                    disabled
+                                                    tabIndex={-1}
+                                                />
+                                                <input
+                                                    type="radio"
+                                                    name={groupName}
+                                                    class="mask mask-star-2 bg-warning"
+                                                    checked={avgRounded === 4}
+                                                    disabled
+                                                    tabIndex={-1}
+                                                />
+                                                <input
+                                                    type="radio"
+                                                    name={groupName}
+                                                    class="mask mask-star-2 bg-warning"
+                                                    checked={avgRounded === 5}
+                                                    disabled
+                                                    tabIndex={-1}
+                                                />
+                                            </>
+                                        );
+                                    })()}
                                 </div>
                                 <p class="text-sm text-base-content/60">Based on {ratingStats().count} reviews</p>
                             </div>

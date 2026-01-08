@@ -179,25 +179,30 @@ export default () => {
                         </div>
                         <For each={cartItems()}>
                             {(item) => (
-                                <div class="flex flex-row items-center gap-4 p-4 bg-base-100 shadow-sm hover:shadow-md transition-shadow rounded-xl border border-base-300">
+                                <A href={`/product/${item.product_id}`} class="no-underline group">
+                                    <div class="flex flex-row items-center gap-4 p-4 bg-base-100 shadow-sm hover:shadow-md transition-shadow rounded-xl border border-base-300 cursor-pointer">
 
-                                    {/* Image */}
-                                    <div class="avatar shrink-0">
-                                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-base-200">
-                                            <img src={item.image_url} alt={item.name} class="object-cover" />
-                                        </div>
-                                    </div>
-
-                                    {/* Details */}
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex justify-between items-start">
-                                            <div>
-                                                <h3 class="font-bold text-base sm:text-lg truncate">{item.name}</h3>
-                                                <p class="text-base-content/60 text-xs sm:text-sm">Ref: {item.product_id}</p>
+                                        {/* Image */}
+                                        <div class="avatar shrink-0">
+                                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-base-200">
+                                                <img src={item.image_url} alt={item.name} class="object-cover" />
                                             </div>
-                                            <button
-                                                class="btn btn-ghost btn-xs text-error sm:hidden"
-                                                onClick={() => removeItem(item.cart_id, item.product_id, item.quantity)}
+                                        </div>
+
+                                        {/* Details */}
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h3 class="font-bold text-base sm:text-lg truncate group-hover:text-primary transition-colors">{item.name}</h3>
+                                                    <p class="text-base-content/60 text-xs sm:text-sm">Ref: {item.product_id}</p>
+                                                </div>
+                                                <button
+                                                    class="btn btn-ghost btn-xs text-error sm:hidden"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        removeItem(item.cart_id, item.product_id, item.quantity);
+                                                    }}
                                                 aria-label="Remove item"
                                             >
                                                 <X size={16} />
@@ -213,7 +218,11 @@ export default () => {
                                                  <div class="join border border-base-300 rounded-lg h-9">
                                                     <button
                                                         class="join-item btn btn-xs btn-ghost px-3 h-full hover:bg-base-200"
-                                                        onClick={() => updateQuantity(item.cart_id, item.product_id, -1)}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            updateQuantity(item.cart_id, item.product_id, -1);
+                                                        }}
                                                     >
                                                         <Minus size={14} />
                                                     </button>
@@ -222,7 +231,11 @@ export default () => {
                                                     </div>
                                                     <button
                                                         class="join-item btn btn-xs btn-ghost px-3 h-full hover:bg-base-200"
-                                                        onClick={() => updateQuantity(item.cart_id, item.product_id, 1)}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            updateQuantity(item.cart_id, item.product_id, 1);
+                                                        }}
                                                     >
                                                         <Plus size={14} />
                                                     </button>
@@ -230,7 +243,11 @@ export default () => {
                                                 
                                                 <button 
                                                     class="btn btn-ghost btn-xs text-error hidden sm:flex gap-1" 
-                                                    onClick={() => removeItem(item.cart_id, item.product_id, item.quantity)}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        removeItem(item.cart_id, item.product_id, item.quantity);
+                                                    }}
                                                 >
                                                     <X size={14} />
                                                     Remove
@@ -239,6 +256,7 @@ export default () => {
                                         </div>
                                     </div>
                                 </div>
+                                </A>
                             )}
                         </For>
                     </div>
@@ -262,38 +280,35 @@ export default () => {
                                     <span>₹{tax().toFixed(2)}</span>
                                 </div>
 
-                                <div class="flex justify-between py-2 text-base-content/80">
-                                    <div class="flex items-center gap-1">
-                                        <Truck size={14} />
-                                        <span>Shipping</span>
-                                    </div>
+                                <div class="flex justify-between py-2 text-base-content/80 items-center">
+                                    <span class="flex items-center gap-1">
+                                        <Truck size={16} />
+                                        Shipping
+                                    </span>
                                     <span>₹10.00</span>
                                 </div>
 
                                 <div class="divider my-2"></div>
 
-                                <div class="flex justify-between font-bold text-xl text-accent mb-6">
+                                <div class="flex justify-between text-xl font-bold text-base-content">
                                     <span>Total</span>
                                     <span>₹{total().toFixed(2)}</span>
                                 </div>
 
-                                <div class="card-actions flex flex-col gap-2">
-                                    <A href="/checkout" class="btn btn-primary btn-block shadow-lg">
-                                        <CreditCard size={18} />
-                                        Proceed to Checkout
-                                    </A>
-                                    <A href="/" class="btn btn-ghost btn-block btn-sm">
-                                        <ShoppingCart size={16} />
-                                        Continue Shopping
-                                    </A>
-                                </div>
+                                <A href="/checkout" class="btn btn-primary btn-block mt-6 btn-lg">
+                                    <CreditCard size={20} />
+                                    Proceed to Checkout
+                                </A>
+
+                                <A href="/" class="btn btn-outline btn-block mt-3">
+                                    <ShoppingCart size={18} />
+                                    Continue Shopping
+                                </A>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </Show>
         </Show>
     );
-}
-
+};

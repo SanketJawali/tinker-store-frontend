@@ -82,6 +82,8 @@ export default () => {
                 token
             );
 
+            setAddToCartLoading(false);
+
             if (response?.success === true) {
                 setButtonMessage("Added!");
                 setButtonColor("btn-success");
@@ -294,14 +296,80 @@ export default () => {
 };
 
 const ProductSkeleton = () => (
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-pulse">
-        <div class="lg:col-span-5 h-[400px] bg-base-300 rounded-xl"></div>
-        <div class="lg:col-span-4 flex flex-col gap-4">
-            <div class="h-8 bg-base-300 w-3/4 rounded"></div>
-            <div class="h-4 bg-base-300 w-1/4 rounded"></div>
-            <div class="h-16 bg-base-300 w-full rounded mt-4"></div>
-            <div class="h-40 bg-base-300 w-full rounded mt-4"></div>
+    <div class="flex flex-col gap-6 animate-pulse">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
+            {/* Left Column: Image Skeleton */}
+            <div class="lg:col-span-7">
+                <div class="bg-base-100 rounded-2xl p-4 border border-base-300">
+                    <div class="skeleton w-full aspect-square max-h-[500px]"></div>
+                </div>
+            </div>
+
+            {/* Right Column: Buy Box Skeleton */}
+            <div class="lg:col-span-5">
+                <div class="flex flex-col gap-6">
+                    {/* Breadcrumbs */}
+                    <div class="flex gap-2 px-1">
+                        <div class="skeleton h-4 w-12"></div>
+                        <div class="skeleton h-4 w-16"></div>
+                        <div class="skeleton h-4 w-24"></div>
+                    </div>
+
+                    {/* Title and seller */}
+                    <div class="flex flex-col gap-2">
+                        <div class="skeleton h-8 lg:h-9 w-full"></div>
+                        <div class="skeleton h-4 w-48"></div>
+                    </div>
+
+                    {/* Price box */}
+                    <div class="p-4 bg-base-100 rounded-xl border border-base-300">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="skeleton h-8 w-32"></div>
+                            <div class="skeleton h-6 w-20 rounded-full"></div>
+                        </div>
+                        <div class="skeleton h-3 w-36"></div>
+                    </div>
+
+                    {/* Desktop Buy Options */}
+                    <div class="hidden lg:block card bg-base-100 border border-base-300">
+                        <div class="card-body p-6 gap-5">
+                            <div class="flex justify-between items-center">
+                                <div class="flex flex-col gap-1">
+                                    <div class="skeleton h-4 w-16"></div>
+                                    <div class="skeleton h-8 w-24"></div>
+                                </div>
+                                <div class="flex flex-col gap-1 items-end">
+                                    <div class="skeleton h-3 w-20"></div>
+                                    <div class="skeleton h-4 w-24"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton h-12 w-full rounded-lg"></div>
+                            <div class="skeleton h-14 w-full rounded-xl"></div>
+                            <div class="skeleton h-14 w-full rounded-xl"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="lg:col-span-3 h-80 bg-base-300 rounded-xl"></div>
+
+        {/* Description Section Skeleton */}
+        <div class="mt-8 pt-8 border-t border-base-300">
+            <div class="skeleton h-8 w-48 mb-6"></div>
+            <div class="bg-base-100 rounded-2xl p-6 border border-base-300 space-y-3">
+                <div class="skeleton h-4 w-full"></div>
+                <div class="skeleton h-4 w-full"></div>
+                <div class="skeleton h-4 w-3/4"></div>
+                <div class="skeleton h-4 w-full"></div>
+                <div class="skeleton h-4 w-5/6"></div>
+            </div>
+        </div>
+
+        {/* Reviews Section Skeleton */}
+        <div class="mt-8">
+            <div class="skeleton h-8 w-32 mb-6"></div>
+            <div class="bg-base-100 rounded-2xl p-6 border border-base-300">
+                <div class="skeleton h-24 w-full"></div>
+            </div>
+        </div>
     </div>
 );

@@ -20,27 +20,29 @@ interface CategoryTabsProps {
 
 export default function CategoryTabs(props: CategoryTabsProps) {
     return (
-        <div class="flex justify-start lg:justify-center w-full mb-1">
-            {/* Updated Tabs with Icons */}
-            <div role="tablist" class="tabs tabs-boxed bg-base-100 p-2 shadow-sm border border-base-300 rounded-2xl flex-nowrap min-w-max lg:min-w-0 lg:flex-wrap gap-1">
-                <For each={CATEGORIES}>
-                    {(category) => {
-                        const Icon = category.icon;
-                        return (
-                            <a
-                                role="tab"
-                                class={`tab transition-all duration-200 flex items-center gap-2 font-medium ${props.activeCategory === category.name
-                                    ? "tab-active bg-neutral text-neutral-content font-bold shadow-md rounded-xl"
-                                    : "text-base-content/70 hover:bg-base-200 rounded-xl"
-                                    }`}
-                                onClick={() => props.onCategoryChange(category.name)}
-                            >
-                                <Icon size={18} class="shrink-0" />
-                                <span class="hidden sm:inline">{category.name}</span>
-                            </a>
-                        );
-                    }}
-                </For>
+        <div class="flex justify-center w-full mb-1">
+            {/* Scrollable container on mobile, centered wrap on larger screens */}
+            <div class="overflow-x-auto w-full sm:w-auto scrollbar-hide">
+                <div role="tablist" class="tabs tabs-boxed bg-base-100 p-2 shadow-sm border border-base-300 rounded-2xl flex-nowrap sm:flex-wrap justify-start sm:justify-center gap-1 min-w-max sm:min-w-0">
+                    <For each={CATEGORIES}>
+                        {(category) => {
+                            const Icon = category.icon;
+                            return (
+                                <a
+                                    role="tab"
+                                    class={`tab transition-all duration-200 flex items-center gap-2 font-medium whitespace-nowrap ${props.activeCategory === category.name
+                                        ? "tab-active bg-neutral text-neutral-content font-bold shadow-md rounded-xl"
+                                        : "text-base-content/70 hover:bg-base-200 rounded-xl"
+                                        }`}
+                                    onClick={() => props.onCategoryChange(category.name)}
+                                >
+                                    <Icon size={18} class="shrink-0" />
+                                    <span>{category.name}</span>
+                                </a>
+                            );
+                        }}
+                    </For>
+                </div>
             </div>
         </div>
     );

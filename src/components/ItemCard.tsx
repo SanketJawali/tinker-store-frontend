@@ -24,7 +24,7 @@ const ItemCard: Component<Product> = (props) => {
     const onAddClick = async (e: MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         const currentSession = session();
         if (!currentSession) {
             alert("Please log in to add items to cart.");
@@ -84,13 +84,13 @@ const ItemCard: Component<Product> = (props) => {
                     </div>
 
                     <p class="text-xs sm:text-sm text-base-content/70 line-clamp-2 hidden sm:block">{props.description}</p>
-                   
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 mt-auto pt-2 border-t border-base-300">
+
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 mt-auto pt-2 border-base-300">
                         <span class="text-lg sm:text-xl font-bold text-base-content">
                             ₹{props.price.toLocaleString()}
                         </span>
                         <button
-                            class={`btn btn-xs sm:btn-sm flex-1 sm:flex-none font-semibold transition-all duration-300 rounded-lg ${buttonColor()} ${addToCartLoading() ? 'opacity-75' : ''}`}
+                            class={`btn btn-sm py-2 sm:py-2 px-3 flex-1 sm:flex-none font-semibold transition-all duration-300 rounded-lg gap-1.5 ${buttonColor()} ${addToCartLoading() ? 'opacity-75' : ''}`}
                             onClick={(e) => onAddClick(e)}
                             disabled={addToCartLoading()}
                         >
@@ -99,7 +99,7 @@ const ItemCard: Component<Product> = (props) => {
                             ) : (
                                 <>
                                     <ShoppingCart size={14} />
-                                    <span class="hidden sm:inline">Add</span>
+                                    <span>Add</span>
                                 </>
                             )}
                         </button>

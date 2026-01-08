@@ -1,13 +1,15 @@
 import { createSignal, onMount, For } from "solid-js";
 import { Palette, Check } from 'lucide-solid';
 
+const DEFAULT_THEME = "lofi"
+
 const THEMES = [
+    { name: "lofi", label: "Lo-Fi", emoji: "🎵" },
     { name: "nord", label: "Nord", emoji: "❄️" },
     { name: "cupcake", label: "Cupcake", emoji: "🧁" },
     { name: "emerald", label: "Emerald", emoji: "💎" },
     { name: "corporate", label: "Corporate", emoji: "🏢" },
     { name: "forest", label: "Forest", emoji: "🌲" },
-    { name: "lofi", label: "Lo-Fi", emoji: "🎵" },
     { name: "pastel", label: "Pastel", emoji: "🎨" },
     { name: "wireframe", label: "Wireframe", emoji: "📐" },
     { name: "black", label: "Black", emoji: "🖤" },
@@ -17,10 +19,10 @@ const THEMES = [
 ];
 
 export default function ThemeSwitcher() {
-    const [currentTheme, setCurrentTheme] = createSignal("nord");
+    const [currentTheme, setCurrentTheme] = createSignal(DEFAULT_THEME);
 
     onMount(() => {
-        const savedTheme = localStorage.getItem("theme") || "nord";
+        const savedTheme = localStorage.getItem("theme") || DEFAULT_THEME;
         setCurrentTheme(savedTheme);
         document.documentElement.setAttribute("data-theme", savedTheme);
     });

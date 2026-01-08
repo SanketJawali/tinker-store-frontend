@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: nord --default, cupcake, emerald, corporate, forest, lofi, pastel, wireframe, black, luxury, dracula, autumn;
+  themes: autumn --default, nord , cupcake, emerald, corporate, forest, lofi, pastel, wireframe, black, luxury, dracula;
 }
 
 body {
@@ -30,4 +30,13 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: oklch(var(--n) / 0.6);
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
 }

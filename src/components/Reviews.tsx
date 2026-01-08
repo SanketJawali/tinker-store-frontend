@@ -15,17 +15,17 @@ interface ReviewSectionProps {
 
 export default function ReviewSection(props: ReviewSectionProps) {
     return (
-        <div id="section-reviews" class="pt-10 border-t border-base-300 w-content mx-auto px-4 md:px-0">
-            <h2 class="text-2xl font-bold mb-8">Customer Reviews</h2>
+        <div id="section-reviews" class="pt-8 lg:pt-10 border-t border-base-200 w-full">
+            <h2 class="text-xl lg:text-2xl font-bold mb-6 lg:mb-8">Customer Reviews</h2>
 
-            <div class="flex flex-col xl:flex-row gap-12">
+            <div class="flex flex-col lg:flex-row gap-6 lg:gap-12">
 
-                <div class="w-full md:w-96 shrink-0">
-                    <div class="card bg-base-100 border border-base-200 shadow-sm sticky top-24">
-                        <div class="card-body p-6">
+                <div class="w-full lg:w-80 shrink-0">
+                    <div class="card bg-base-100 border border-base-200 shadow-sm lg:sticky lg:top-24">
+                        <div class="card-body p-4 lg:p-6">
 
                             {/* Average Rating Block */}
-                            <div class="flex flex-col gap-2 mb-6">
+                            <div class="flex flex-col items-center lg:items-start gap-2 mb-6">
                                 <span class="text-4xl font-extrabold text-base-content">4.0</span>
                                 <div class="rating rating-md">
                                     {/* Using read-only styling instead of disabled inputs for better visibility */}
@@ -100,11 +100,10 @@ export default function ReviewSection(props: ReviewSectionProps) {
                                                             <input
                                                                 type="radio"
                                                                 name={`rating-${review.id}`}
-                                                                class="mask mask-star-2 bg-orange-400 cursor-default"
+                                                                class="mask mask-star-2 bg-warning cursor-default"
                                                                 disabled
-                                                                checked={i < review.rating}
-                                                                // Force opacity so disabled stars don't look faded
-                                                                style={{ "background-color": i < review.rating ? "" : "#e5e7eb", "opacity": "1" }}
+                                                                checked={i() < review.rating}
+                                                                style={{ "opacity": "1" }}
                                                             />
                                                         )}
                                                     </For>

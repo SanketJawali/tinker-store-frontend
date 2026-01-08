@@ -1,36 +1,60 @@
-import { Component } from "solid-js";
+import { Component, createSignal } from "solid-js";
 import { Product, NewCartItem } from "../types";
 import { addToCart } from "../lib/cartHelpers";
-import { useSession } from "clerk-solidjs"; // Import Hook
+import { useSession } from "clerk-solidjs";
 import { A } from "@solidjs/router";
 import { getOptimizedImageUrl, ImageKitTransformation } from '../lib/imagekit';
+import { ShoppingCart } from 'lucide-solid';
 
 
 // Helper function stays the same
 async function handleAddToCart(cartItem: NewCartItem, authToken: string) {
     // console.log("Adding to cart with token:", authToken.substring(0, 10) + "...");
-    await addToCart(cartItem, authToken);
+    return await addToCart(cartItem, authToken);
 }
 
 const ItemCard: Component<Product> = (props) => {
     // 1. Use the hook inside the component
     const { session } = useSession();
 
-    const onAddClick = async () => {
+    const [addToCartLoading, setAddToCartLoading] = createSignal<boolean>(false);
+    const [buttonMessage, setButtonMessage] = createSignal<string>("Add to Cart");
+    const [buttonColor, setButtonColor] = createSignal<string>("btn-primary");
+
+    const onAddClick = async (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         const currentSession = session();
         if (!currentSession) {
             alert("Please log in to add items to cart.");
             return;
         }
 
-        // 2. Get token asynchronously when the user CLICKS
         const token = await currentSession.getToken();
 
         if (token) {
-            await handleAddToCart(
+            setAddToCartLoading(true);
+
+            const response = await handleAddToCart(
                 { product_id: props.id, quantity: 1 },
                 token
             );
+
+            setAddToCartLoading(false);
+
+            if (response?.success === true) {
+                setButtonMessage("Added!");
+                setButtonColor("btn-success");
+                setTimeout(() => setButtonMessage("Add to Cart"), 2000);
+                setTimeout(() => setButtonColor("btn-primary"), 2000);
+            }
+            else if (response?.success === false) {
+                setButtonMessage("Error!");
+                setButtonColor("btn-error");
+                setTimeout(() => setButtonMessage("Add to Cart"), 2000);
+                setTimeout(() => setButtonColor("btn-primary"), 2000);
+            }
         }
     };
 
@@ -41,41 +65,49 @@ const ItemCard: Component<Product> = (props) => {
     const imageUrl = getOptimizedImageUrl(props.image_url, cardTransformations);
 
     return (
-        <div class="card w-full h-full bg-base-100 shadow-md hover:shadow-xl transition-shadow duration-300 border border-base-200">
+        <A href={`/product/${props.id}`} class="no-underline group">
+            <div class="card w-full h-full bg-base-100 shadow-sm hover:shadow-lg transition-all duration-300 border border-base-300 group overflow-hidden rounded-xl hover:scale-[1.02] cursor-pointer">
 
-            <figure class="px-0 pt-0">
-                <img
-                    src={imageUrl}
-                    alt={props.name}
-                    class="w-full object-cover"
-                />
-            </figure>
+                <figure class="relative aspect-square overflow-hidden bg-base-200">
+                    <img
+                        src={imageUrl}
+                        alt={props.name}
+                        class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                    />
+                </figure>
 
-            <div class="card-body flex flex-col p-5">
-                <div class="flex justify-between items-start gap-2">
-                    <A class="card-title text-lg leading-tight" href={`/product/${props.id}`}>{props.name}</A>
-                    <span class="badge badge-lg badge-ghost font-bold shrink-0">
-                        ₹{props.price}
-                    </span>
-                </div>
+                <div class="card-body p-3 sm:p-4 gap-2">
+                    <div class="flex flex-col gap-1">
+                        <span class="text-[10px] sm:text-xs font-semibold text-primary uppercase tracking-wider">{props.category}</span>
+                        <h3 class="text-sm sm:text-base font-bold text-base-content group-hover:text-primary transition-colors line-clamp-2 leading-tight">{props.name}</h3>
+                    </div>
 
-                {/* FIX 3: limit text lines so cards don't become excessively tall */}
-                <p class="text-sm text-base-content/70 grow line-clamp-3">
-                    {props.description}
-                </p>
+                    <p class="text-xs sm:text-sm text-base-content/70 line-clamp-2 hidden sm:block">{props.description}</p>
 
-                <div class="card-actions justify-end mt-4">
-                    <button
-                        class="btn btn-primary btn-sm"
-                        onClick={onAddClick} // Use our new wrapper
-                    >
-                        Add to Cart
-                    </button>
-                    {/* <button class="btn btn-secondary btn-sm">Buy Now</button> */}
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 mt-auto pt-2 border-base-300">
+                        <span class="text-lg sm:text-xl font-bold text-base-content">
+                            ₹{props.price.toLocaleString()}
+                        </span>
+                        <button
+                            class={`btn btn-sm py-2 sm:py-2 px-3 flex-1 sm:flex-none font-semibold transition-all duration-300 rounded-lg gap-1.5 ${buttonColor()} ${addToCartLoading() ? 'opacity-75' : ''}`}
+                            onClick={(e) => onAddClick(e)}
+                            disabled={addToCartLoading()}
+                        >
+                            {addToCartLoading() ? (
+                                <span class="loading loading-spinner loading-xs"></span>
+                            ) : (
+                                <>
+                                    <ShoppingCart size={14} />
+                                    <span>Add</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div >
-    )
-}
+        </A>
+    );
+};
 
 export default ItemCard;

@@ -1,15 +1,35 @@
 import { A } from "@solidjs/router"
+import { Home, Info, Mail, ShoppingBag } from 'lucide-solid';
 
 export default () => {
     return (
-        <footer class="footer footer-horizontal footer-center bg-base-200 text-base-content rounded p-10">
-            <aside>
-                <p>Copyright © {new Date().getFullYear()} - Tinker Store</p>
+        <footer class="footer bg-base-200 text-base-content p-8 lg:p-10 border-t border-base-300 flex flex-col sm:flex-row items-center sm:items-start justify-center sm:justify-between gap-8">
+            <aside class="flex flex-col items-center text-center sm:text-left sm:items-start">
+                <div class="flex items-center gap-2 mb-2">
+                    <ShoppingBag size={24} class="text-primary" />
+                    <span class="text-xl font-bold text-base-content">Tinker Store</span>
+                </div>
+                <p class="text-sm text-base-content/70">
+                    Your marketplace for quality products
+                </p>
+                <p class="text-xs text-base-content/50 mt-1">
+                    Copyright © {new Date().getFullYear()} - All rights reserved
+                </p>
             </aside>
-            <nav class="grid grid-flow-col gap-4">
-                <A class="link link-hover" href="/">Home</A>
-                <A class="link link-hover" href="/about">About</A>
-                <A class="link link-hover" href="/contact">Contact</A>
+            <nav class="flex flex-col items-center sm:items-start gap-2">
+                <h6 class="footer-title text-base-content">Quick Links</h6>
+                <A class="link link-hover flex items-center gap-2 text-base-content/70 hover:text-primary" href="/">
+                    <Home size={16} />
+                    Home
+                </A>
+                <A class="link link-hover flex items-center gap-2 text-base-content/70 hover:text-primary" href="/about">
+                    <Info size={16} />
+                    About
+                </A>
+                <A class="link link-hover flex items-center gap-2 text-base-content/70 hover:text-primary" href="/contact">
+                    <Mail size={16} />
+                    Contact
+                </A>
             </nav>
         </footer>
     )

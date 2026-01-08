@@ -70,23 +70,31 @@ export default (props: ContainerProps) => {
 
             {/* Pagination */}
             <Show when={products()}>
-                <div class="flex justify-center items-center gap-4 mt-8 mb-12">
+                <div class="flex justify-center items-center gap-2 sm:gap-4 mt-8 mb-12 px-4">
                     <button
-                        class="btn btn-outline"
+                        class="btn btn-outline btn-sm sm:btn-md"
                         disabled={page() === 1 || products.loading}
                         onClick={() => handlePageChange(page() - 1)}
                     >
-                        Previous
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span class="hidden sm:inline">Previous</span>
                     </button>
 
-                    <span class="font-mono text-lg">Page {page()}</span>
+                    <div class="join">
+                        <button class="join-item btn btn-sm sm:btn-md btn-active">Page {page()}</button>
+                    </div>
 
                     <button
-                        class="btn btn-outline"
+                        class="btn btn-outline btn-sm sm:btn-md"
                         disabled={products.loading || (products() && products()!.length < 20)}
                         onClick={() => handlePageChange(page() + 1)}
                     >
-                        Next
+                        <span class="hidden sm:inline">Next</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
                     </button>
                 </div>
             </Show>

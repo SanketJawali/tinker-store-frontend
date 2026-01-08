@@ -3,6 +3,8 @@ import { CartListWrapper, APIErrorResponse, CartItem } from "../types";
 import { useSession } from "clerk-solidjs";
 import { addToCart } from "../lib/cartHelpers";
 import { NewCartItem } from "../types";
+import { A } from "@solidjs/router";
+import { ShoppingBag, Minus, Plus, X, ShoppingCart, Truck, Receipt, CreditCard } from 'lucide-solid';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
@@ -80,12 +82,12 @@ export default () => {
     const total = createMemo(() => subtotal() + tax() + 10); // +10 Shipping
 
     // Handlers
-    const updateQuantity = async (id: number, change: number) => {
+    const updateQuantity = async (cartId: number, productId: number, change: number) => {
         const token = await currentSession.getToken();
         if (token) {
             try {
                 const response = await handleAddToCart(
-                    { product_id: id, quantity: change },
+                    { cart_id: cartId, product_id: productId, quantity: change },
                     token
                 );
 
@@ -103,7 +105,7 @@ export default () => {
                         if (prevItem == null) return prevItem;
 
                         const updatedItems = prevItem.map(item => {
-                            if (item.cart_id === id) {
+                            if (item.cart_id === cartId) {
                                 return {
                                     ...item,
                                     quantity: item.quantity + change
@@ -123,12 +125,12 @@ export default () => {
         }
     };
 
-    const removeItem = async (id: number, quantity: number) => {
+    const removeItem = async (cartId: number, productId: number, quantity: number) => {
         const token = await currentSession.getToken();
         if (token) {
             try {
                 const response = await handleAddToCart(
-                    { product_id: id, quantity: quantity * -1 },
+                    { cart_id: cartId, product_id: productId, quantity: quantity * -1 },
                     token
                 )
 
@@ -138,7 +140,7 @@ export default () => {
                 }
 
                 if (response.success == true) {
-                    setCartItems((prevItems) => prevItems?.filter(item => item.cart_id !== id) || []);
+                    setCartItems((prevItems) => prevItems?.filter(item => item.cart_id !== cartId) || []);
                 }
 
             }
@@ -153,104 +155,160 @@ export default () => {
                 when={cartItems() && cartItems()!.length > 0}
                 fallback={
                     <div class="text-center py-20">
-                        <h2 class="text-2xl font-bold text-base-content/50">Your cart is empty</h2>
-                        <a href="/" class="btn btn-primary mt-4">Continue Shopping</a>
+                        <div class="flex justify-center mb-4">
+                            <div class="rounded-full bg-base-200 p-6">
+                                <ShoppingBag size={48} class="text-base-content/30" />
+                            </div>
+                        </div>
+                        <h2 class="text-2xl font-bold text-base-content mb-2">Your cart is empty</h2>
+                        <p class="text-base-content/60 mb-4">Looks like you haven't added anything to your cart yet</p>
+                        <A href="/" class="btn btn-primary">
+                            <ShoppingCart size={18} />
+                            Continue Shopping
+                        </A>
                     </div>
                 }
             >
-                <div class="flex flex-col lg:flex-row gap-8">
+                <div class="flex flex-col lg:flex-row gap-8 pb-20 lg:pb-0">
 
                     {/* Left Side: Cart Items */}
                     <div class="flex-1 flex flex-col gap-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <ShoppingBag size={20} class="text-secondary" />
+                            <h2 class="text-lg font-bold">Shopping Cart ({cartItems()?.length || 0} items)</h2>
+                        </div>
                         <For each={cartItems()}>
                             {(item) => (
-                                <div class="flex flex-col sm:flex-row items-center gap-4 p-4 bg-base-100 shadow-md rounded-box border border-base-200">
+                                <A href={`/product/${item.product_id}`} class="no-underline group">
+                                    <div class="flex flex-row items-center gap-4 p-4 bg-base-100 shadow-sm hover:shadow-md transition-shadow rounded-xl border border-base-300 cursor-pointer">
 
-                                    {/* Image */}
-                                    <div class="avatar">
-                                        <div class="w-24 h-24 rounded-xl">
-                                            <img src={item.image_url} alt={item.name} />
+                                        {/* Image */}
+                                        <div class="avatar shrink-0">
+                                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-base-200">
+                                                <img src={item.image_url} alt={item.name} class="object-cover" />
+                                            </div>
+                                        </div>
+
+                                        {/* Details */}
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h3 class="font-bold text-base sm:text-lg truncate group-hover:text-primary transition-colors">{item.name}</h3>
+                                                    <p class="text-base-content/60 text-xs sm:text-sm">Ref: {item.product_id}</p>
+                                                </div>
+                                                <button
+                                                    class="btn btn-ghost btn-xs text-error sm:hidden"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        removeItem(item.cart_id, item.product_id, item.quantity);
+                                                    }}
+                                                aria-label="Remove item"
+                                            >
+                                                <X size={16} />
+                                            </button>
+                                        </div>
+
+                                        <div class="flex flex-col sm:flex-row sm:items-end justify-between mt-2 gap-2">
+                                             <div class="font-bold text-accent text-lg">
+                                                ₹{item.price.toFixed(2)}
+                                            </div>
+
+                                            <div class="flex items-center gap-3">
+                                                 <div class="join border border-base-300 rounded-lg h-9">
+                                                    <button
+                                                        class="join-item btn btn-xs btn-ghost px-3 h-full hover:bg-base-200"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            updateQuantity(item.cart_id, item.product_id, -1);
+                                                        }}
+                                                    >
+                                                        <Minus size={14} />
+                                                    </button>
+                                                    <div class="join-item px-4 flex items-center justify-center bg-base-100 text-sm font-bold min-w-10 h-full border-x border-base-300">
+                                                        {item.quantity}
+                                                    </div>
+                                                    <button
+                                                        class="join-item btn btn-xs btn-ghost px-3 h-full hover:bg-base-200"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            updateQuantity(item.cart_id, item.product_id, 1);
+                                                        }}
+                                                    >
+                                                        <Plus size={14} />
+                                                    </button>
+                                                </div>
+                                                
+                                                <button 
+                                                    class="btn btn-ghost btn-xs text-error hidden sm:flex gap-1" 
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        removeItem(item.cart_id, item.product_id, item.quantity);
+                                                    }}
+                                                >
+                                                    <X size={14} />
+                                                    Remove
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-
-                                    {/* Details */}
-                                    <div class="flex-1 text-center sm:text-left">
-                                        <h3 class="font-bold text-lg">{item.name}</h3>
-                                        <p class="text-base-content/70 text-sm hidden">Ref: {item.product_id}</p>
-                                        <div class="mt-2 font-semibold text-primary">
-                                            ₹{item.price.toFixed(2)}
-                                        </div>
-                                    </div>
-
-                                    {/* Quantity Controls */}
-                                    <div class="flex items-center gap-2">
-                                        <button
-                                            class="btn btn-sm btn-circle btn-ghost"
-                                            onClick={() => updateQuantity(item.cart_id, -1)}
-                                        >
-                                            -
-                                        </button>
-                                        <span class="w-8 text-center font-bold">{item.quantity}</span>
-                                        <button
-                                            class="btn btn-sm btn-circle btn-ghost"
-                                            onClick={() => updateQuantity(item.cart_id, 1)}
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-
-                                    {/* Remove Button */}
-                                    <button
-                                        class="btn btn-ghost btn-sm text-error"
-                                        onClick={() => removeItem(item.cart_id, item.quantity)}
-                                    >
-                                        Remove
-                                    </button>
                                 </div>
+                                </A>
                             )}
                         </For>
                     </div>
 
                     {/* Right Side: Order Summary */}
-                    <div class="w-full lg:w-96">
-                        <div class="card bg-base-100 shadow-xl border border-base-200 sticky top-4">
-                            <div class="card-body">
-                                <h2 class="card-title mb-4">Order Summary</h2>
+                    <div class="w-full lg:w-96 shrink-0">
+                        <div class="card bg-base-100 shadow-xl border border-base-300 lg:sticky lg:top-24">
+                            <div class="card-body p-6">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <Receipt size={20} class="text-secondary" />
+                                    <h2 class="card-title text-xl">Order Summary</h2>
+                                </div>
 
-                                <div class="flex justify-between py-2">
+                                <div class="flex justify-between py-2 text-base-content/80">
                                     <span>Subtotal</span>
                                     <span>₹{subtotal().toFixed(2)}</span>
                                 </div>
 
-                                <div class="flex justify-between py-2">
+                                <div class="flex justify-between py-2 text-base-content/80">
                                     <span>Estimated Tax</span>
                                     <span>₹{tax().toFixed(2)}</span>
                                 </div>
 
-                                <div class="flex justify-between py-2">
-                                    <span>Shipping</span>
+                                <div class="flex justify-between py-2 text-base-content/80 items-center">
+                                    <span class="flex items-center gap-1">
+                                        <Truck size={16} />
+                                        Shipping
+                                    </span>
                                     <span>₹10.00</span>
                                 </div>
 
                                 <div class="divider my-2"></div>
 
-                                <div class="flex justify-between font-bold text-lg text-primary">
+                                <div class="flex justify-between text-xl font-bold text-base-content">
                                     <span>Total</span>
                                     <span>₹{total().toFixed(2)}</span>
                                 </div>
 
-                                <div class="card-actions mt-6">
-                                    <button class="btn btn-primary btn-block">
-                                        Checkout
-                                    </button>
-                                </div>
+                                <A href="/checkout" class="btn btn-primary btn-block mt-6 btn-lg">
+                                    <CreditCard size={20} />
+                                    Proceed to Checkout
+                                </A>
+
+                                <A href="/" class="btn btn-outline btn-block mt-3">
+                                    <ShoppingCart size={18} />
+                                    Continue Shopping
+                                </A>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </Show>
         </Show>
     );
-}
-
+};

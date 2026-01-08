@@ -57,7 +57,8 @@ export default () => {
     // Fetch cart data
     const [fetchedCartItems, { mutate, refetch }] = createResource(fetchCart);
     const [cartItems, setCartItems] = createSignal(fetchedCartItems());
-    const [loading, setLoading] = createSignal(fetchedCartItems.loading);
+    const [loading, setLoading] = createSignal(true); // Default to true so skeleton shows immediately
+    const [updatingItemId, setUpdatingItemId] = createSignal<number | null>(null);
 
     createEffect(() => {
         if (fetchedCartItems.loading === false) {
@@ -86,6 +87,7 @@ export default () => {
         const token = await currentSession.getToken();
         if (token) {
             try {
+                setUpdatingItemId(cartId);
                 const response = await handleAddToCart(
                     { cart_id: cartId, product_id: productId, quantity: change },
                     token
@@ -121,6 +123,8 @@ export default () => {
             }
             catch (e) {
                 console.error("Failed to update item from cart:", e);
+            } finally {
+                setUpdatingItemId(null);
             }
         }
     };
@@ -129,6 +133,7 @@ export default () => {
         const token = await currentSession.getToken();
         if (token) {
             try {
+                setUpdatingItemId(cartId);
                 const response = await handleAddToCart(
                     { cart_id: cartId, product_id: productId, quantity: quantity * -1 },
                     token
@@ -146,11 +151,13 @@ export default () => {
             }
             catch (e) {
                 console.error("Failed to remove item from cart:", e);
+            } finally {
+                setUpdatingItemId(null);
             }
         };
     }
     return (
-        <Show when={!loading()} fallback={<div class="text-center py-20"><span class="loading loading-spinner loading-lg"></span></div>}>
+        <Show when={!loading()} fallback={<CartSkeleton />}>
             <Show
                 when={cartItems() && cartItems()!.length > 0}
                 fallback={
@@ -179,30 +186,32 @@ export default () => {
                         </div>
                         <For each={cartItems()}>
                             {(item) => (
-                                <A href={`/product/${item.product_id}`} class="no-underline group">
-                                    <div class="flex flex-row items-center gap-4 p-4 bg-base-100 shadow-sm hover:shadow-md transition-shadow rounded-xl border border-base-300 cursor-pointer">
+                                <div class="flex flex-row items-center gap-4 p-4 bg-base-100 shadow-sm hover:shadow-md transition-shadow rounded-xl border border-base-300">
 
-                                        {/* Image */}
-                                        <div class="avatar shrink-0">
-                                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-base-200">
-                                                <img src={item.image_url} alt={item.name} class="object-cover" />
-                                            </div>
+                                    {/* Image - Clickable */}
+                                    <A href={`/product/${item.product_id}`} class="avatar shrink-0">
+                                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-base-200 cursor-pointer hover:opacity-80 transition-opacity">
+                                            <img src={item.image_url} alt={item.name} class="object-cover" />
                                         </div>
+                                    </A>
 
-                                        {/* Details */}
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <h3 class="font-bold text-base sm:text-lg truncate group-hover:text-primary transition-colors">{item.name}</h3>
-                                                    <p class="text-base-content/60 text-xs sm:text-sm">Ref: {item.product_id}</p>
-                                                </div>
-                                                <button
-                                                    class="btn btn-ghost btn-xs text-error sm:hidden"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        removeItem(item.cart_id, item.product_id, item.quantity);
-                                                    }}
+                                    {/* Details */}
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <A href={`/product/${item.product_id}`} class="no-underline">
+                                                    <h3 class="font-bold text-base sm:text-lg truncate hover:text-primary transition-colors cursor-pointer">{item.name}</h3>
+                                                </A>
+                                                <p class="text-base-content/60 text-xs sm:text-sm">Ref: {item.product_id}</p>
+                                            </div>
+                                            <button
+                                                class="btn btn-ghost btn-xs text-error sm:hidden"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    removeItem(item.cart_id, item.product_id, item.quantity);
+                                                }}
+                                                disabled={updatingItemId() === item.cart_id}
                                                 aria-label="Remove item"
                                             >
                                                 <X size={16} />
@@ -223,11 +232,16 @@ export default () => {
                                                             e.stopPropagation();
                                                             updateQuantity(item.cart_id, item.product_id, -1);
                                                         }}
+                                                        disabled={updatingItemId() === item.cart_id}
                                                     >
                                                         <Minus size={14} />
                                                     </button>
                                                     <div class="join-item px-4 flex items-center justify-center bg-base-100 text-sm font-bold min-w-10 h-full border-x border-base-300">
-                                                        {item.quantity}
+                                                        {updatingItemId() === item.cart_id ? (
+                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                        ) : (
+                                                            item.quantity
+                                                        )}
                                                     </div>
                                                     <button
                                                         class="join-item btn btn-xs btn-ghost px-3 h-full hover:bg-base-200"
@@ -236,6 +250,7 @@ export default () => {
                                                             e.stopPropagation();
                                                             updateQuantity(item.cart_id, item.product_id, 1);
                                                         }}
+                                                        disabled={updatingItemId() === item.cart_id}
                                                     >
                                                         <Plus size={14} />
                                                     </button>
@@ -248,6 +263,7 @@ export default () => {
                                                         e.stopPropagation();
                                                         removeItem(item.cart_id, item.product_id, item.quantity);
                                                     }}
+                                                    disabled={updatingItemId() === item.cart_id}
                                                 >
                                                     <X size={14} />
                                                     Remove
@@ -256,7 +272,6 @@ export default () => {
                                         </div>
                                     </div>
                                 </div>
-                                </A>
                             )}
                         </For>
                     </div>
@@ -310,5 +325,102 @@ export default () => {
                 </div>
             </Show>
         </Show>
+    );
+};
+
+// Skeleton component for cart loading state
+const CartSkeleton = () => {
+    return (
+        <div class="flex flex-col lg:flex-row gap-8 pb-20 lg:pb-0 animate-pulse">
+            {/* Left Side: Cart Items Skeleton */}
+            <div class="flex-1 flex flex-col gap-4">
+                {/* Header skeleton */}
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-5 h-5 bg-base-300 rounded"></div>
+                    <div class="h-6 w-48 bg-base-300 rounded"></div>
+                </div>
+
+                {/* Cart item skeletons - show 3 placeholder items */}
+                <For each={[1, 2, 3]}>
+                    {() => (
+                        <div class="flex flex-row items-center gap-4 p-4 bg-base-100 rounded-xl border border-base-300">
+                            {/* Image skeleton */}
+                            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-base-300 rounded-lg shrink-0"></div>
+
+                            {/* Details skeleton */}
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        {/* Title */}
+                                        <div class="h-5 sm:h-6 bg-base-300 rounded w-3/4 mb-2"></div>
+                                        {/* Ref */}
+                                        <div class="h-3 sm:h-4 bg-base-300 rounded w-20"></div>
+                                    </div>
+                                    {/* Mobile remove button skeleton */}
+                                    <div class="w-6 h-6 bg-base-300 rounded sm:hidden"></div>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row sm:items-end justify-between mt-2 gap-2">
+                                    {/* Price */}
+                                    <div class="h-6 bg-base-300 rounded w-24"></div>
+
+                                    <div class="flex items-center gap-3">
+                                        {/* Quantity controls */}
+                                        <div class="h-9 w-28 bg-base-300 rounded-lg"></div>
+                                        {/* Remove button skeleton */}
+                                        <div class="h-6 w-20 bg-base-300 rounded hidden sm:block"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </For>
+            </div>
+
+            {/* Right Side: Order Summary Skeleton */}
+            <div class="w-full lg:w-96 shrink-0">
+                <div class="card bg-base-100 border border-base-300 lg:sticky lg:top-24">
+                    <div class="card-body p-6">
+                        {/* Header */}
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-5 h-5 bg-base-300 rounded"></div>
+                            <div class="h-6 w-36 bg-base-300 rounded"></div>
+                        </div>
+
+                        {/* Subtotal */}
+                        <div class="flex justify-between py-2">
+                            <div class="h-5 w-20 bg-base-300 rounded"></div>
+                            <div class="h-5 w-16 bg-base-300 rounded"></div>
+                        </div>
+
+                        {/* Tax */}
+                        <div class="flex justify-between py-2">
+                            <div class="h-5 w-28 bg-base-300 rounded"></div>
+                            <div class="h-5 w-14 bg-base-300 rounded"></div>
+                        </div>
+
+                        {/* Shipping */}
+                        <div class="flex justify-between py-2">
+                            <div class="h-5 w-24 bg-base-300 rounded"></div>
+                            <div class="h-5 w-14 bg-base-300 rounded"></div>
+                        </div>
+
+                        <div class="divider my-2"></div>
+
+                        {/* Total */}
+                        <div class="flex justify-between">
+                            <div class="h-7 w-16 bg-base-300 rounded"></div>
+                            <div class="h-7 w-24 bg-base-300 rounded"></div>
+                        </div>
+
+                        {/* Checkout button */}
+                        <div class="h-14 bg-base-300 rounded-lg mt-6"></div>
+
+                        {/* Continue shopping button */}
+                        <div class="h-12 bg-base-300 rounded-lg mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };

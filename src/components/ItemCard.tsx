@@ -18,7 +18,7 @@ const ItemCard: Component<Product> = (props) => {
     const { session } = useSession();
 
     const [addToCartLoading, setAddToCartLoading] = createSignal<boolean>(false);
-    const [buttonMessage, setButtonMessage] = createSignal<string>("Add to Cart");
+    const [buttonMessage, setButtonMessage] = createSignal<string>("Add");
     const [buttonColor, setButtonColor] = createSignal<string>("btn-primary");
 
     const onAddClick = async (e: MouseEvent) => {
@@ -46,13 +46,13 @@ const ItemCard: Component<Product> = (props) => {
             if (response?.success === true) {
                 setButtonMessage("Added!");
                 setButtonColor("btn-success");
-                setTimeout(() => setButtonMessage("Add to Cart"), 2000);
+                setTimeout(() => setButtonMessage("Add"), 2000);
                 setTimeout(() => setButtonColor("btn-primary"), 2000);
             }
             else if (response?.success === false) {
                 setButtonMessage("Error!");
                 setButtonColor("btn-error");
-                setTimeout(() => setButtonMessage("Add to Cart"), 2000);
+                setTimeout(() => setButtonMessage("Add"), 2000);
                 setTimeout(() => setButtonColor("btn-primary"), 2000);
             }
         }
@@ -99,7 +99,7 @@ const ItemCard: Component<Product> = (props) => {
                             ) : (
                                 <>
                                     <ShoppingCart size={14} />
-                                    <span>Add</span>
+                                    <span>{buttonMessage()}</span>
                                 </>
                             )}
                         </button>

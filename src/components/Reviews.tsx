@@ -1,22 +1,76 @@
-import { For, Show } from "solid-js";
-
-export interface Review {
-    id: number;
-    user: string;
-    rating: number;
-    comment: string;
-    date: string;
-}
+import { For, Show, createMemo } from "solid-js";
+import { PenLine } from "lucide-solid";
+import { Review } from "../types";
 
 interface ReviewSectionProps {
     reviews: Review[] | undefined;
     loading: boolean;
+    onWriteReviewClick?: () => void;
 }
 
 export default function ReviewSection(props: ReviewSectionProps) {
+    const avgRatingGroupName = `avg-rating-${Math.random().toString(36).slice(2)}`;
+
+    // Calculate rating distribution and average
+    const ratingStats = createMemo(() => {
+        const reviews = props.reviews || [];
+        
+        if (reviews.length === 0) {
+            return {
+                average: 0,
+                count: 0,
+                distribution: [
+                    { label: "5 star", count: 0, pct: 0 },
+                    { label: "4 star", count: 0, pct: 0 },
+                    { label: "3 star", count: 0, pct: 0 },
+                    { label: "2 star", count: 0, pct: 0 },
+                    { label: "1 star", count: 0, pct: 0 }
+                ]
+            };
+        }
+
+        // Count reviews by rating
+        const counts = [0, 0, 0, 0, 0]; // indices 0-4 for ratings 1-5
+        let totalRating = 0;
+
+        reviews.forEach(review => {
+            const ratingIndex = Math.max(0, Math.min(4, review.rating - 1));
+            counts[ratingIndex]++;
+            totalRating += review.rating;
+        });
+
+        const average = totalRating / reviews.length;
+        
+        // Calculate percentages
+        const distribution = [
+            { label: "5 star", count: counts[4], pct: Math.round((counts[4] / reviews.length) * 100) },
+            { label: "4 star", count: counts[3], pct: Math.round((counts[3] / reviews.length) * 100) },
+            { label: "3 star", count: counts[2], pct: Math.round((counts[2] / reviews.length) * 100) },
+            { label: "2 star", count: counts[1], pct: Math.round((counts[1] / reviews.length) * 100) },
+            { label: "1 star", count: counts[0], pct: Math.round((counts[0] / reviews.length) * 100) }
+        ];
+
+        return {
+            average: parseFloat(average.toFixed(1)),
+            count: reviews.length,
+            distribution
+        };
+    });
+
     return (
         <div id="section-reviews" class="pt-8 lg:pt-10 border-t border-base-200 w-full">
-            <h2 class="text-xl lg:text-2xl font-bold mb-6 lg:mb-8">Customer Reviews</h2>
+            <div class="flex items-center justify-between mb-6 lg:mb-8">
+                <h2 class="text-xl lg:text-2xl font-bold">Customer Reviews</h2>
+                <Show when={props.onWriteReviewClick}>
+                    <button
+                        class="btn btn-primary btn-sm lg:btn-md gap-2"
+                        onClick={props.onWriteReviewClick}
+                    >
+                        <PenLine size={16} />
+                        Write a Review
+                    </button>
+                </Show>
+            </div>
 
             <div class="flex flex-col lg:flex-row gap-6 lg:gap-12">
 
@@ -26,33 +80,38 @@ export default function ReviewSection(props: ReviewSectionProps) {
 
                             {/* Average Rating Block */}
                             <div class="flex flex-col items-center lg:items-start gap-2 mb-6">
-                                <span class="text-4xl font-extrabold text-base-content">4.0</span>
-                                <div class="rating rating-md">
-                                    {/* Using read-only styling instead of disabled inputs for better visibility */}
+                                <span class="text-4xl font-extrabold text-base-content">{ratingStats().average.toFixed(1)}</span>
+                                <div class="rating rating-md pointer-events-none">
                                     <For each={Array(5).fill(0)}>
-                                        {(_, i) => (
-                                            <div class={`mask mask-star-2 w-5 h-5 ${i < 4 ? 'bg-orange-400' : 'bg-base-300'}`}></div>
-                                        )}
+                                        {(_, i) => {
+                                            const avgRounded = Math.round(ratingStats().average);
+                                            const selectedIndex = avgRounded > 0 ? Math.min(4, avgRounded - 1) : -1;
+                                            return (
+                                                <input
+                                                    type="radio"
+                                                    name={avgRatingGroupName}
+                                                    class="mask mask-star-2 bg-warning"
+                                                    checked={selectedIndex >= 0 && i() === selectedIndex}
+                                                    tabindex={-1}
+                                                />
+                                            );
+                                        }}
                                     </For>
                                 </div>
-                                <p class="text-sm text-base-content/60">Based on 1,234 reviews</p>
+                                <p class="text-sm text-base-content/60">Based on {ratingStats().count} reviews</p>
                             </div>
 
                             {/* Histogram Bars */}
                             <div class="space-y-3">
-                                {[
-                                    { label: "5 star", pct: 70 },
-                                    { label: "4 star", pct: 20 },
-                                    { label: "3 star", pct: 5 },
-                                    { label: "2 star", pct: 2 },
-                                    { label: "1 star", pct: 3 }
-                                ].map((row) => (
-                                    <div class="grid grid-cols-[50px_1fr_40px] items-center gap-2 text-sm">
-                                        <span class="text-base-content/70 whitespace-nowrap">{row.label}</span>
-                                        <progress class="progress progress-warning w-full" value={row.pct} max="100"></progress>
-                                        <span class="text-right text-base-content/60">{row.pct}%</span>
-                                    </div>
-                                ))}
+                                <For each={ratingStats().distribution}>
+                                    {(row) => (
+                                        <div class="grid grid-cols-[50px_1fr_40px] items-center gap-2 text-sm">
+                                            <span class="text-base-content/70 whitespace-nowrap">{row.label}</span>
+                                            <progress class="progress progress-warning w-full" value={row.pct} max="100"></progress>
+                                            <span class="text-right text-base-content/60">{row.pct}%</span>
+                                        </div>
+                                    )}
+                                </For>
                             </div>
 
                         </div>
@@ -80,39 +139,44 @@ export default function ReviewSection(props: ReviewSectionProps) {
                                                 <div class="flex items-center gap-3">
                                                     <div class="avatar placeholder">
                                                         <div class="bg-neutral text-neutral-content rounded-full w-10">
-                                                            <span class="text-lg font-bold">{review.user.charAt(0)}</span>
+                                                            <span class="text-lg font-bold">U</span>
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <h4 class="font-bold text-base">{review.user}</h4>
+                                                        <h4 class="font-bold text-base">User #{review.user_id}</h4>
                                                         <span class="text-xs text-base-content/50 block">Verified Purchase</span>
                                                     </div>
                                                 </div>
-                                                <span class="text-xs text-base-content/50">{review.date}</span>
+                                                <span class="text-xs text-base-content/50">{new Date(review.created_at).toLocaleDateString()}</span>
                                             </div>
+
+                                            {/* Review Title */}
+                                            <h5 class="font-semibold text-base text-base-content mb-2">{review.title}</h5>
 
                                             {/* Star Rating Display */}
                                             <div class="flex items-center gap-2 mb-3">
-                                                <div class="rating rating-sm">
-                                                    {/* Use unique names per review to prevent radio conflict */}
+                                                <div class="rating rating-sm pointer-events-none">
                                                     <For each={Array(5).fill(0)}>
-                                                        {(_, i) => (
-                                                            <input
-                                                                type="radio"
-                                                                name={`rating-${review.id}`}
-                                                                class="mask mask-star-2 bg-warning cursor-default"
-                                                                disabled
-                                                                checked={i() < review.rating}
-                                                                style={{ "opacity": "1" }}
-                                                            />
-                                                        )}
+                                                        {(_, i) => {
+                                                            const rating = Math.max(0, Math.min(5, Number(review.rating) || 0));
+                                                            const selectedIndex = rating > 0 ? rating - 1 : -1;
+                                                            return (
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`rating-${review.id}`}
+                                                                    class="mask mask-star-2 bg-warning"
+                                                                    checked={selectedIndex >= 0 && i() === selectedIndex}
+                                                                    tabindex={-1}
+                                                                />
+                                                            );
+                                                        }}
                                                     </For>
                                                 </div>
                                                 <span class="text-sm font-semibold">{review.rating}.0</span>
                                             </div>
 
                                             <p class="text-base text-base-content/80 leading-relaxed">
-                                                {review.comment}
+                                                {review.content}
                                             </p>
                                         </div>
                                     </div>

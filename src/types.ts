@@ -53,6 +53,7 @@ export interface FilterState {
     category: string;
     search: string;
     maxPrice: number;
+    sortBy: 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 }
 
 // --- General API Response Structures ---

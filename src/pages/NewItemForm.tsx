@@ -241,12 +241,12 @@ export default () => {
 
                     <div class="flex-1 flex flex-col justify-center">
                         <div
-                            class={`relative w-full aspect-square rounded-2xl border-2 border-dashed transition-all duration-200 flex flex-col items-center justify-center overflow-hidden bg-base-100 ${isDragging() ? 'border-primary bg-primary/5 scale-[1.02]' :
+                            class={`relative w-full aspect-square rounded-2xl border-2 border-dashed transition-all duration-200 flex flex-col items-center justify-center overflow-hidden bg-base-100 ${isDragging() ? 'border-secondary bg-secondary/5 scale-[1.02]' :
                                 errors.imageFile
                                     ? 'border-error bg-error/5'
                                     : previewUrl()
-                                        ? 'border-primary/50'
-                                        : 'border-base-300 hover:border-primary hover:bg-base-200'
+                                        ? 'border-secondary/50'
+                                        : 'border-base-300 hover:border-secondary hover:bg-base-200'
                                 }`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
@@ -262,11 +262,11 @@ export default () => {
 
                             <Show when={!previewUrl()}>
                                 <label for="image-upload" class="cursor-pointer w-full h-full flex flex-col items-center justify-center gap-3 p-6 text-center">
-                                    <div class={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${isDragging() ? 'bg-primary/20' : 'bg-base-200'}`}>
-                                        <RiMediaImageAddLine class={`text-3xl ${isDragging() ? 'text-primary' : 'text-base-content/50'}`} />
+                                    <div class={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${isDragging() ? 'bg-secondary/20' : 'bg-base-200'}`}>
+                                        <RiMediaImageAddLine class={`text-3xl ${isDragging() ? 'text-secondary' : 'text-base-content/50'}`} />
                                     </div>
                                     <div>
-                                        <span class="font-semibold text-primary hover:underline">Click to upload</span>
+                                        <span class="font-semibold text-secondary hover:underline">Click to upload</span>
                                         <span class="text-base-content/60"> or drag and drop</span>
                                     </div>
                                     <span class="text-xs text-base-content/40">SVG, PNG, JPG or GIF (MAX. {MAX_IMAGE_SIZE_MB}MB)</span>

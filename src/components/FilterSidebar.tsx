@@ -1,6 +1,6 @@
 import { Component, createSignal, createEffect, onCleanup, Show } from "solid-js";
 import { FilterState } from "../types";
-import { Search, RotateCcw, Sliders } from 'lucide-solid';
+import { Search, RotateCcw, Sliders, ArrowUpDown } from 'lucide-solid';
 
 interface SidebarProps {
     // Pass the raw store object, do not destructure!
@@ -40,46 +40,62 @@ const FilterSidebar: Component<SidebarProps> = (props) => {
         <div class="relative">
             {/* Overlay when loading */}
             <Show when={props.loading}>
-                <div class="absolute inset-0 z-20 bg-white/60 backdrop-blur-[1px] cursor-not-allowed rounded-lg transition-all duration-200"></div>
+                <div class="absolute inset-0 z-20 bg-base-100/60 backdrop-blur-[1px] cursor-not-allowed rounded-lg transition-all duration-200"></div>
             </Show>
 
             <div class={`flex flex-col gap-6 transition-opacity duration-200 ${props.loading ? 'opacity-50 pointer-events-none' : ''}`}>
                 {/* Filter Header */}
-                <div class="flex items-center gap-2 pb-2 border-b-2 border-primary/20">
+                <div class="flex items-center gap-2 pb-2 border-b border-base-300">
                     <Sliders size={20} class="text-primary" />
                     <h2 class="text-lg font-bold text-base-content">Filters</h2>
                 </div>
 
                 {/* Search Input */}
                 <div class="form-control w-full">
-                    <label class="label py-2">
-                        <span class="label-text font-semibold text-base-content flex items-center gap-2">
-                            <Search size={16} class="text-primary" />
-                            Search Products
-                        </span>
-                    </label>
                     <div class="relative">
                         <input
                             type="text"
                             placeholder="Search products..."
-                            class="input input-bordered w-full pl-10 bg-base-100 border-2 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+                            class="input input-bordered w-full pl-10 bg-base-100 border border-base-300 focus:border-primary focus:outline-none transition-all"
                             value={searchTerm()}
                             onInput={handleSearch}
                             disabled={props.loading} 
                         />
-                        <Search size={18} class="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-primary/60" />
+                        <Search size={18} class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50" />
                     </div>
+                </div>
+
+                {/* Sort By */}
+                <div class="form-control w-full">
+                    <label class="label py-1">
+                        <span class="label-text font-semibold text-base-content flex items-center gap-2">
+                            <ArrowUpDown size={16} class="text-primary" />
+                            Sort By
+                        </span>
+                    </label>
+                    <select 
+                        class="select select-bordered w-full bg-base-100 border border-base-300"
+                        value={props.currentFilters.sortBy}
+                        onChange={(e) => props.onFilterChange("sortBy", e.currentTarget.value)}
+                        disabled={props.loading}
+                    >
+                        <option value="default">Default</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="name-asc">Name: A to Z</option>
+                        <option value="name-desc">Name: Z to A</option>
+                    </select>
                 </div>
 
                 {/* Price Filter */}
                 <div class="form-control w-full">
-                    <label class="label py-2">
+                    <label class="label py-1">
                         <span class="label-text font-semibold text-base-content">Price Range</span>
                     </label>
-                    <div class="bg-gradient-to-br from-base-200 to-base-300 rounded-2xl p-4 border-2 border-primary/20">
+                    <div class="bg-base-200 rounded-xl p-4 border border-base-300">
                         <div class="flex justify-between items-center mb-3">
                             <span class="text-sm font-medium text-base-content">Max Price</span>
-                            <span class="badge badge-primary badge-lg font-bold">
+                            <span class="badge badge-primary font-bold">
                                 ₹{props.currentFilters.maxPrice >= 10000 ? "10,000+" : props.currentFilters.maxPrice.toLocaleString()}
                             </span>
                         </div>
@@ -105,7 +121,7 @@ const FilterSidebar: Component<SidebarProps> = (props) => {
 
                 {/* Reset Button */}
                 <button
-                    class="btn btn-outline btn-primary w-full font-semibold transition-all duration-200 rounded-xl"
+                    class="btn btn-outline w-full font-semibold transition-all duration-200 rounded-xl"
                     onClick={props.onReset}
                     disabled={props.loading}
                 >

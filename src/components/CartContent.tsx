@@ -150,7 +150,7 @@ export default () => {
         };
     }
     return (
-        <Show when={!loading()} fallback={<div class="text-center py-20"><span class="loading loading-spinner loading-lg text-primary"></span></div>}>
+        <Show when={!loading()} fallback={<div class="text-center py-20"><span class="loading loading-spinner loading-lg"></span></div>}>
             <Show
                 when={cartItems() && cartItems()!.length > 0}
                 fallback={
@@ -174,7 +174,7 @@ export default () => {
                     {/* Left Side: Cart Items */}
                     <div class="flex-1 flex flex-col gap-4">
                         <div class="flex items-center gap-2 mb-2">
-                            <ShoppingBag size={20} class="text-primary" />
+                            <ShoppingBag size={20} class="text-secondary" />
                             <h2 class="text-lg font-bold">Shopping Cart ({cartItems()?.length || 0} items)</h2>
                         </div>
                         <For each={cartItems()}>
@@ -205,23 +205,23 @@ export default () => {
                                         </div>
 
                                         <div class="flex flex-col sm:flex-row sm:items-end justify-between mt-2 gap-2">
-                                             <div class="font-bold text-primary text-lg">
+                                             <div class="font-bold text-accent text-lg">
                                                 ₹{item.price.toFixed(2)}
                                             </div>
 
                                             <div class="flex items-center gap-3">
-                                                 <div class="join border-2 border-primary/30 rounded-lg h-9">
+                                                 <div class="join border border-base-300 rounded-lg h-9">
                                                     <button
-                                                        class="join-item btn btn-xs btn-ghost px-3 h-full hover:bg-primary/10"
+                                                        class="join-item btn btn-xs btn-ghost px-3 h-full hover:bg-base-200"
                                                         onClick={() => updateQuantity(item.cart_id, item.product_id, -1)}
                                                     >
                                                         <Minus size={14} />
                                                     </button>
-                                                    <div class="join-item px-4 flex items-center justify-center bg-base-100 text-sm font-bold min-w-10 h-full border-x-2 border-primary/30">
+                                                    <div class="join-item px-4 flex items-center justify-center bg-base-100 text-sm font-bold min-w-10 h-full border-x border-base-300">
                                                         {item.quantity}
                                                     </div>
                                                     <button
-                                                        class="join-item btn btn-xs btn-ghost px-3 h-full hover:bg-primary/10"
+                                                        class="join-item btn btn-xs btn-ghost px-3 h-full hover:bg-base-200"
                                                         onClick={() => updateQuantity(item.cart_id, item.product_id, 1)}
                                                     >
                                                         <Plus size={14} />
@@ -248,7 +248,7 @@ export default () => {
                         <div class="card bg-base-100 shadow-xl border border-base-300 lg:sticky lg:top-24">
                             <div class="card-body p-6">
                                 <div class="flex items-center gap-2 mb-4">
-                                    <Receipt size={20} class="text-primary" />
+                                    <Receipt size={20} class="text-secondary" />
                                     <h2 class="card-title text-xl">Order Summary</h2>
                                 </div>
 
@@ -272,7 +272,7 @@ export default () => {
 
                                 <div class="divider my-2"></div>
 
-                                <div class="flex justify-between font-bold text-xl text-primary mb-6">
+                                <div class="flex justify-between font-bold text-xl text-accent mb-6">
                                     <span>Total</span>
                                     <span>₹{total().toFixed(2)}</span>
                                 </div>

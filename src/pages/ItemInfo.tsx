@@ -179,13 +179,13 @@ export default () => {
                                             <div class="text-sm breadcrumbs text-base-content/60 px-1">
                                                 <ul>
                                                     <li><A href="/">Home</A></li>
-                                                    <li><A href={`/search?category=${item.category}`}>{item.category}</A></li>
+                                                    <li><A href={`/?category=${item.category}`}>{item.category}</A></li>
                                                     <li><span class="truncate max-w-[150px]">{item.name}</span></li>
                                                 </ul>
                                             </div>
 
                                             <div>
-                                                <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-2">{item.name}</h1>
+                                                <h1 class="text-2xl lg:text-3xl font-bold leading-tight mb-2 text-base-content">{item.name}</h1>
                                                 <div class="flex items-center gap-2 text-sm text-base-content/60">
                                                     <span>Sold by User #{item.owner_id}</span>
                                                     <span>•</span>
@@ -195,8 +195,8 @@ export default () => {
 
                                             <div class="flex flex-col gap-2 p-4 bg-base-100 rounded-xl border border-base-300 shadow-sm">
                                                 <div class="flex justify-between items-center">
-                                                    <span class="text-3xl font-bold text-primary">₹{item.price.toLocaleString()}</span>
-                                                    <div class={`badge ${item.stock > 0 ? 'badge-success badge-outline' : 'badge-error badge-outline'} gap-1 font-bold`}>
+                                                    <span class="text-2xl font-bold text-base-content">₹{item.price.toLocaleString()}</span>
+                                                    <div class={`badge ${item.stock > 0 ? 'badge-success' : 'badge-error'} gap-1 font-semibold`}>
                                                         {item.stock > 0 ? 'In Stock' : 'Out of Stock'}
                                                     </div>
                                                 </div>
@@ -204,11 +204,17 @@ export default () => {
                                             </div>
 
                                             {/* Desktop Buy Options */}
-                                            <div class="hidden lg:block card bg-base-100 border border-base-300 shadow-xl overflow-hidden">
-                                                <div class="card-body p-6 gap-6">
-                                                    <div>
-                                                         <h3 class="text-2xl font-bold">₹{item.price.toLocaleString()}</h3>
-                                                         <p class="text-success text-sm font-medium mt-1">Free Delivery available</p>
+                                            <div class="hidden lg:block card bg-base-100 border border-base-300 shadow-lg overflow-hidden">
+                                                <div class="card-body p-6 gap-5">
+                                                    <div class="flex justify-between items-center">
+                                                        <div>
+                                                            <p class="text-sm text-base-content/60">Total Price</p>
+                                                            <h3 class="text-2xl font-bold text-base-content">₹{(item.price * quantity()).toLocaleString()}</h3>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <p class="text-xs text-base-content/60">₹{item.price.toLocaleString()} × {quantity()}</p>
+                                                            <p class="text-success text-sm font-medium">Free Delivery</p>
+                                                        </div>
                                                     </div>
 
                                                     <div class="form-control w-full">
@@ -226,7 +232,7 @@ export default () => {
                                                         >
                                                             {addToCartLoading() ? <span class="loading loading-spinner"></span> : buttonMessage()}
                                                         </button>
-                                                        <button class="btn btn-secondary w-full rounded-xl" disabled={item.stock <= 0}>
+                                                        <button class="btn btn-outline btn-lg w-full rounded-xl" disabled={item.stock <= 0}>
                                                             Buy Now
                                                         </button>
                                                     </div>
@@ -237,8 +243,8 @@ export default () => {
                                 </div>
 
                                 {/* Full Width Description Section Below */}
-                                <div id="section-desc" class="mt-8 pt-8 border-t-2 border-base-300">
-                                    <h2 class="font-bold text-2xl mb-6 text-primary">Product Description</h2>
+                                <div id="section-desc" class="mt-8 pt-8 border-t border-base-300">
+                                    <h2 class="font-bold text-2xl mb-6 text-base-content">Product Description</h2>
                                     <div class="bg-base-100 rounded-2xl p-6 border border-base-300 shadow-sm">
                                         <article class="prose prose-sm lg:prose-base w-full max-w-none prose-img:rounded-xl">
                                             <SolidMarkdown>{item.description}</SolidMarkdown>
@@ -260,13 +266,20 @@ export default () => {
              <Suspense>
                 <Show when={product()}>
                     {(item) => (
-                        <div class="fixed bottom-0 left-0 right-0 bg-base-100 p-3 px-4 border-t border-base-200 z-50 lg:hidden shadow-[0_-5px_20px_rgba(0,0,0,0.1)] flex items-center gap-4 safe-bottom">
-                            <div class="flex flex-col">
-                                <span class="text-xs text-base-content/60 font-medium">Total Price</span>
-                                <span class="text-xl font-bold text-primary">₹{item().price}</span>
+                        <div class="fixed bottom-0 left-0 right-0 bg-base-100 p-3 px-4 border-t border-base-300 z-50 lg:hidden shadow-[0_-5px_20px_rgba(0,0,0,0.08)] flex items-center gap-3 safe-bottom">
+                            <div class="flex flex-col min-w-0">
+                                <span class="text-xs text-base-content/60 font-medium">₹{item().price.toLocaleString()} × {quantity()}</span>
+                                <span class="text-lg font-bold text-base-content">₹{(item().price * quantity()).toLocaleString()}</span>
                             </div>
+                            <select 
+                                class="select select-bordered select-sm w-16"
+                                value={quantity()}
+                                onChange={(e) => setQuantity(Number(e.target.value))}
+                            >
+                                <For each={[1, 2, 3, 4, 5]}>{(n) => <option value={n}>{n}</option>}</For>
+                            </select>
                             <button 
-                                class="btn btn-primary flex-1 rounded-full shadow-lg"
+                                class="btn btn-primary flex-1 rounded-lg"
                                 onClick={onAddClick}
                                 disabled={addToCartLoading() || item().stock <= 0}
                             >

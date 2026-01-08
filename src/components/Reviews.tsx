@@ -100,11 +100,10 @@ export default function ReviewSection(props: ReviewSectionProps) {
                                                             <input
                                                                 type="radio"
                                                                 name={`rating-${review.id}`}
-                                                                class="mask mask-star-2 bg-orange-400 cursor-default"
+                                                                class="mask mask-star-2 bg-warning cursor-default"
                                                                 disabled
-                                                                checked={i < review.rating}
-                                                                // Force opacity so disabled stars don't look faded
-                                                                style={{ "background-color": i < review.rating ? "" : "#e5e7eb", "opacity": "1" }}
+                                                                checked={i() < review.rating}
+                                                                style={{ "opacity": "1" }}
                                                             />
                                                         )}
                                                     </For>

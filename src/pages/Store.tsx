@@ -9,13 +9,14 @@ import { FilterState } from '../types';
 import { Filter, X } from 'lucide-solid';
 
 export default () => {
-    const [searchParams, setSearchParams] = useSearchParams<{ search?: string; category?: string }>();
+    const [searchParams, setSearchParams] = useSearchParams<{ search?: string; category?: string; sort?: string }>();
     const navigate = useNavigate();
 
     const [filters, setFilters] = createStore<FilterState>({
         category: searchParams.category || "All",
         search: searchParams.search || "",
-        maxPrice: 10000
+        maxPrice: 10000,
+        sortBy: (searchParams.sort as FilterState['sortBy']) || 'default'
     });
 
     const [isLoading, setIsLoading] = createSignal(true);
@@ -29,6 +30,9 @@ export default () => {
         }
         if (filters.category !== "All") {
             params.set('category', filters.category);
+        }
+        if (filters.sortBy !== 'default') {
+            params.set('sort', filters.sortBy);
         }
         
         const queryString = params.toString();
@@ -44,7 +48,7 @@ export default () => {
     };
 
     const resetFilters = () => {
-        setFilters({ category: "All", search: "", maxPrice: 10000 });
+        setFilters({ category: "All", search: "", maxPrice: 10000, sortBy: 'default' });
         setIsFilterOpen(false);
         navigate('/', { replace: true });
     };
@@ -52,11 +56,11 @@ export default () => {
     return (
         <div class="flex flex-col lg:flex-row min-h-screen bg-base-200">
             {/* Mobile Header & Filter Toggle */}
-            <div class="lg:hidden p-4 bg-base-100 flex flex-col gap-4 sticky top-16 z-30 shadow-md border-b-2 border-primary/20">
+            <div class="lg:hidden p-4 bg-base-100 flex flex-col gap-4 sticky top-16 z-30 shadow-sm border-b border-base-300">
                 <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-primary">Marketplace</h1>
+                    <h1 class="text-2xl font-bold text-base-content">Marketplace</h1>
                     <button 
-                        class={`btn btn-sm rounded-lg font-semibold transition-all ${isFilterOpen() ? 'btn-error' : 'btn-outline btn-primary'}`}
+                        class={`btn btn-sm rounded-lg font-semibold transition-all ${isFilterOpen() ? 'btn-error' : 'btn-outline'}`}
                         onClick={() => setIsFilterOpen(!isFilterOpen())}
                     >
                         <Filter size={18} />
@@ -73,7 +77,7 @@ export default () => {
 
             {/* Sidebar */}
             <aside class={`
-                w-full lg:w-80 bg-base-100 border-r-2 border-primary/20 p-6 z-20 
+                w-full lg:w-80 bg-base-100 border-r border-base-300 p-6 z-20 
                 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:overflow-y-auto lg:block
                 fixed inset-0 top-32 overflow-y-auto transition-transform duration-300 ease-in-out
                 ${isFilterOpen() ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -96,7 +100,7 @@ export default () => {
             <main class="flex-1 p-4 lg:p-8">
                 <div class="hidden lg:flex flex-col gap-6 mb-8">
                     <div class="flex justify-between items-center">
-                        <h1 class="text-4xl font-bold text-primary">Marketplace</h1>
+                        <h1 class="text-4xl font-bold text-base-content">Marketplace</h1>
                     </div>
                     <CategoryTabs
                         activeCategory={filters.category}

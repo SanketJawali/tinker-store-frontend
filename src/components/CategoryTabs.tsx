@@ -22,7 +22,7 @@ export default function CategoryTabs(props: CategoryTabsProps) {
     return (
         <div class="flex justify-start lg:justify-center w-full mb-1">
             {/* Updated Tabs with Icons */}
-            <div role="tablist" class="tabs tabs-boxed bg-gradient-to-r from-base-200 to-base-300 p-2 shadow-md border-2 border-primary/20 rounded-2xl flex-nowrap min-w-max lg:min-w-0 lg:flex-wrap gap-1">
+            <div role="tablist" class="tabs tabs-boxed bg-base-100 p-2 shadow-sm border border-base-300 rounded-2xl flex-nowrap min-w-max lg:min-w-0 lg:flex-wrap gap-1">
                 <For each={CATEGORIES}>
                     {(category) => {
                         const Icon = category.icon;
@@ -30,7 +30,7 @@ export default function CategoryTabs(props: CategoryTabsProps) {
                             <a
                                 role="tab"
                                 class={`tab transition-all duration-200 flex items-center gap-2 font-medium ${props.activeCategory === category.name
-                                    ? "tab-active bg-primary text-primary-content font-bold shadow-md rounded-xl"
+                                    ? "tab-active bg-neutral text-neutral-content font-bold shadow-md rounded-xl"
                                     : "text-base-content/70 hover:bg-base-200 rounded-xl"
                                     }`}
                                 onClick={() => props.onCategoryChange(category.name)}

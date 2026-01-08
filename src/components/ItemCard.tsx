@@ -1,10 +1,10 @@
 import { Component, createSignal } from "solid-js";
 import { Product, NewCartItem } from "../types";
 import { addToCart } from "../lib/cartHelpers";
-import { useSession } from "clerk-solidjs"; // Import Hook
+import { useSession } from "clerk-solidjs";
 import { A } from "@solidjs/router";
 import { getOptimizedImageUrl, ImageKitTransformation } from '../lib/imagekit';
-import { ShoppingCart, Tag } from 'lucide-solid';
+import { ShoppingCart } from 'lucide-solid';
 
 
 // Helper function stays the same
@@ -31,7 +31,6 @@ const ItemCard: Component<Product> = (props) => {
             return;
         }
 
-        // 2. Get token asynchronously when the user CLICKS
         const token = await currentSession.getToken();
 
         if (token) {
@@ -41,6 +40,8 @@ const ItemCard: Component<Product> = (props) => {
                 { product_id: props.id, quantity: 1 },
                 token
             );
+
+            setAddToCartLoading(false);
 
             if (response?.success === true) {
                 setButtonMessage("Added!");
@@ -65,41 +66,40 @@ const ItemCard: Component<Product> = (props) => {
 
     return (
         <A href={`/product/${props.id}`} class="no-underline group">
-            <div class="card w-full h-full bg-base-100 shadow-md hover:shadow-2xl transition-all duration-300 border border-base-300 group overflow-hidden rounded-2xl hover:scale-105 cursor-pointer">
+            <div class="card w-full h-full bg-base-100 shadow-sm hover:shadow-lg transition-all duration-300 border border-base-300 group overflow-hidden rounded-xl hover:scale-[1.02] cursor-pointer">
 
                 <figure class="relative aspect-square overflow-hidden bg-base-200">
                     <img
                         src={imageUrl}
                         alt={props.name}
-                        class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+                        class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                     />
-                    <div class="absolute top-3 right-3 bg-base-100 px-3 py-1 rounded-full shadow-md flex items-center gap-1">
-                        <Tag size={16} class="text-primary" />
-                        <span class="text-sm font-bold text-primary">₹{props.price}</span>
-                    </div>
                 </figure>
 
-                <div class="card-body p-4 sm:p-5 gap-3">
-                    <div class="flex flex-col gap-2">
-                        <span class="text-xs font-bold text-primary uppercase tracking-wider bg-primary/10 px-2 py-1 rounded-full w-fit">{props.category}</span>
-                        <h3 class="card-title text-lg text-base-content group-hover:text-primary transition-colors line-clamp-2">{props.name}</h3>
+                <div class="card-body p-3 sm:p-4 gap-2">
+                    <div class="flex flex-col gap-1">
+                        <span class="text-[10px] sm:text-xs font-semibold text-primary uppercase tracking-wider">{props.category}</span>
+                        <h3 class="text-sm sm:text-base font-bold text-base-content group-hover:text-primary transition-colors line-clamp-2 leading-tight">{props.name}</h3>
                     </div>
 
-                    <p class="text-sm text-base-content/60 line-clamp-2">{props.description}</p>
+                    <p class="text-xs sm:text-sm text-base-content/70 line-clamp-2 hidden sm:block">{props.description}</p>
                    
-                    <div class="flex items-center gap-2 mt-auto pt-3 border-t border-base-300">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 mt-auto pt-2 border-t border-base-300">
+                        <span class="text-lg sm:text-xl font-bold text-base-content">
+                            ₹{props.price.toLocaleString()}
+                        </span>
                         <button
-                            class={`btn btn-sm flex-1 font-semibold transition-all duration-300 rounded-lg ${buttonColor()} ${addToCartLoading() ? 'opacity-75' : ''}`}
-                            onClick={onAddClick}
+                            class={`btn btn-xs sm:btn-sm flex-1 sm:flex-none font-semibold transition-all duration-300 rounded-lg ${buttonColor()} ${addToCartLoading() ? 'opacity-75' : ''}`}
+                            onClick={(e) => onAddClick(e)}
                             disabled={addToCartLoading()}
                         >
                             {addToCartLoading() ? (
-                                <span class="loading loading-spinner loading-sm text-white"></span>
+                                <span class="loading loading-spinner loading-xs"></span>
                             ) : (
                                 <>
-                                    <ShoppingCart size={16} />
-                                    {buttonMessage()}
+                                    <ShoppingCart size={14} />
+                                    <span class="hidden sm:inline">Add</span>
                                 </>
                             )}
                         </button>

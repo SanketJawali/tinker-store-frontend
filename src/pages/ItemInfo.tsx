@@ -1,17 +1,24 @@
 import { useSession } from "clerk-solidjs";
-import { createResource, createSignal, Suspense, Show, For } from "solid-js";
+import { createResource, createSignal, Suspense, Show, For, createEffect } from "solid-js";
 import { useParams } from "@solidjs/router";
 import { A } from "@solidjs/router";
 import { SolidMarkdown } from "solid-markdown";
 import { getOptimizedImageUrl, ImageKitTransformation } from '../lib/imagekit';
-import ReviewSection, { Review } from '../components/Reviews';
-import { Product, SingleProductResponse, NewCartItem } from '../types';
+import ReviewSection from '../components/Reviews';
+import ReviewForm from '../components/ReviewForm';
+import { Product, SingleProductResponse, NewCartItem, Review } from '../types';
 import { addToCart } from "../lib/cartHelpers";
 
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
+interface ProductWithReviews {
+    product: Product;
+    reviews: Review[];
+}
+
 // --- Fetchers ---
-const fetchProduct = async (id: string): Promise<Product> => {
+const fetchProduct = async (id: string): Promise<ProductWithReviews> => {
     const response = await fetch(`${BACKEND_URL}/api/product/${id}`);
 
     if (!response.ok) {
@@ -25,20 +32,14 @@ const fetchProduct = async (id: string): Promise<Product> => {
         throw new Error(`API Error: ${json.message}`);
     }
 
-    // Ensure price is a number to prevent .toLocaleString() crashes
+    // Ensure price is a number and return both product and reviews
     return {
-        ...json.data.product,
-        price: Number(json.data.product.price)
+        product: {
+            ...json.data.product,
+            price: Number(json.data.product.price)
+        },
+        reviews: json.data.reviews || []
     };
-};
-
-// Keeping reviews mocked for now as no API route was provided for them
-const fetchReviews = async (id: string): Promise<Review[]> => {
-    await new Promise(r => setTimeout(r, 1000));
-    return [
-        { id: 1, user: "John Doe", rating: 5, comment: "Excellent build quality!", date: "2023-11-01" },
-        { id: 2, user: "Jane Smith", rating: 4, comment: "Good, but shipping was slow.", date: "2023-10-25" },
-    ];
 };
 
 async function handleAddToCart(cartItem: NewCartItem, authToken: string) {
@@ -54,12 +55,29 @@ export default () => {
     const [buttonColor, setButtonColor] = createSignal<string>("btn-primary");
     const [activeTab, setActiveTab] = createSignal<"Info" | "Description" | "Reviews">("Info");
     const [quantity, setQuantity] = createSignal<number>(1);
+    const [isReviewFormOpen, setIsReviewFormOpen] = createSignal<boolean>(false);
+    const [reviewsList, setReviewsList] = createSignal<Review[]>([]);
 
     const params = useParams();
 
-    // 1. Use a function for the source to ensure reactivity to URL changes
-    const [product] = createResource(() => params.id, fetchProduct);
-    const [reviews] = createResource(() => params.id, fetchReviews);
+    // Fetch product data which includes reviews
+    const [productData] = createResource(() => params.id, fetchProduct);
+
+    // Extract product for easier access
+    const product = () => productData()?.product;
+
+    // Sync reviews from the product data when it loads
+    createEffect(() => {
+        const data = productData();
+        if (data?.reviews) {
+            setReviewsList(data.reviews);
+        }
+    });
+
+    // Handle adding a new review to the list
+    const handleReviewAdded = (review: Review) => {
+        setReviewsList(prev => [review, ...prev]);
+    };
 
     const onAddClick = async () => {
         const currentSession = session();
@@ -71,7 +89,7 @@ export default () => {
         // 2. Get token asynchronously when the user CLICKS
         const token = await currentSession.getToken();
 
-        if (token && !product.loading && product()?.id !== undefined) {
+        if (token && !productData.loading && product()?.id !== undefined) {
             setAddToCartLoading(true);
 
             // if (product == undefined || !product().id) {
@@ -106,7 +124,7 @@ export default () => {
         return getOptimizedImageUrl(url, transforms);
     };
 
-    const scrollToSection = (id: string, tabName: () => "Info" | "Description" | "Reviews") => {
+    const scrollToSection = (id: string, tabName: "Info" | "Description" | "Reviews") => {
         const el = document.getElementById(id);
         if (el) {
             const offset = 100; // Adjust for sticky header
@@ -119,7 +137,7 @@ export default () => {
                 top: offsetPosition,
                 behavior: "smooth"
             });
-            setActiveTab(tabName());
+            setActiveTab(tabName);
         }
     };
 
@@ -130,30 +148,30 @@ export default () => {
                 <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 flex gap-2">
                     <button
                         class={`btn btn-sm rounded-full ${activeTab() === 'Info' ? 'btn-neutral' : 'btn-ghost'}`}
-                        onClick={() => scrollToSection('section-top', () => 'Info')}
+                        onClick={() => scrollToSection('section-top', 'Info')}
                     >
                         Overview
                     </button>
                     <button
                         class={`btn btn-sm rounded-full ${activeTab() === 'Description' ? 'btn-neutral' : 'btn-ghost'}`}
-                        onClick={() => scrollToSection('section-desc', () => 'Description')}
+                        onClick={() => scrollToSection('section-desc', 'Description')}
                     >
                         Description
                     </button>
                     <button
                         class={`btn btn-sm rounded-full ${activeTab() === 'Reviews' ? 'btn-neutral' : 'btn-ghost'}`}
-                        onClick={() => scrollToSection('section-reviews', () => 'Reviews')}
+                        onClick={() => scrollToSection('section-reviews', 'Reviews')}
                     >
-                        Reviews ({reviews()?.length || 0})
+                        Reviews ({reviewsList()?.length || 0})
                     </button>
                 </div>
             </div>
 
             <div class="max-w-7xl mx-auto p-4 lg:p-8" id="section-top">
                 <Suspense fallback={<ProductSkeleton />}>
-                    <Show when={product.error}>
+                    <Show when={productData.error}>
                         <div class="alert alert-error">
-                            <span>Error loading product: {product.error.message}</span>
+                            <span>Error loading product: {productData.error.message}</span>
                         </div>
                     </Show>
 
@@ -256,8 +274,20 @@ export default () => {
                                 
                                 {/* Reviews Section Full Width */}
                                 <div id="section-reviews" class="mt-8">
-                                     <ReviewSection reviews={reviews() || []} loading={reviews.loading} />
+                                     <ReviewSection 
+                                         reviews={reviewsList()} 
+                                         loading={productData.loading} 
+                                         onWriteReviewClick={() => setIsReviewFormOpen(true)}
+                                     />
                                 </div>
+
+                                {/* Review Form Modal */}
+                                <ReviewForm
+                                    productId={item.id}
+                                    isOpen={isReviewFormOpen()}
+                                    onClose={() => setIsReviewFormOpen(false)}
+                                    onReviewAdded={handleReviewAdded}
+                                />
                             </div>
                         )}
                     </Show>

@@ -23,7 +23,8 @@ export interface Review {
     item_id: number;
     user_id: number;
     rating: number; // Constrained 1-5
-    review_text: string;
+    title: string;
+    content: string;
     // Dates are transmitted as ISO 8601 strings
     created_at: string;
     updated_at: string;
@@ -143,4 +144,25 @@ export interface CartListWrapper {
     success: boolean;
     message: string;
     data: CartItem[];
+}
+
+// --- Review Related Interfaces ---
+
+/**
+ * Request body for creating a new review via POST /api/new-review
+ */
+export interface NewReviewRequest {
+    product_id: number;
+    title: string;        // max_length: 200
+    rating: number;       // 1-5
+    content: string;      // max_length: 1000
+}
+
+/**
+ * Response wrapper for a successful review creation
+ */
+export interface NewReviewResponse {
+    success: true;
+    message: string;
+    data?: Review;
 }

@@ -1,6 +1,6 @@
 import { useSession } from "clerk-solidjs";
 import { createResource, createSignal, Suspense, Show, For, createEffect } from "solid-js";
-import { useParams } from "@solidjs/router";
+import { useParams, useNavigate } from "@solidjs/router";
 import { A } from "@solidjs/router";
 import { SolidMarkdown } from "solid-markdown";
 import { getOptimizedImageUrl, ImageKitTransformation } from '../lib/imagekit';
@@ -49,8 +49,10 @@ async function handleAddToCart(cartItem: NewCartItem, authToken: string) {
 export default () => {
     // 1. Use the hook inside the component
     const { session } = useSession();
+    const navigate = useNavigate();
 
     const [addToCartLoading, setAddToCartLoading] = createSignal<boolean>(false);
+    const [buyNowLoading, setBuyNowLoading] = createSignal<boolean>(false);
     const [buttonMessage, setButtonMessage] = createSignal<string>("Add to Cart");
     const [buttonColor, setButtonColor] = createSignal<string>("btn-primary");
     const [activeTab, setActiveTab] = createSignal<"Info" | "Description" | "Reviews">("Info");
@@ -113,6 +115,34 @@ export default () => {
                 setButtonColor("btn-error");
                 setTimeout(() => setButtonMessage("Add to Cart"), 2000);
                 setTimeout(() => setButtonColor("btn-primary"), 2000);
+            }
+        }
+    };
+
+    const onBuyNowClick = async () => {
+        const currentSession = session();
+        if (!currentSession) {
+            alert("Please log in to buy now.");
+            return;
+        }
+
+        const token = await currentSession.getToken();
+
+        if (token && !productData.loading && product()?.id !== undefined) {
+            setBuyNowLoading(true);
+
+            const response = await handleAddToCart(
+                { product_id: product()!.id, quantity: quantity() },
+                token
+            );
+
+            setBuyNowLoading(false);
+
+            if (response?.success === true) {
+                // Redirect to cart page
+                navigate('/cart');
+            } else if (response?.success === false) {
+                alert("Failed to add item to cart. Please try again.");
             }
         }
     };
@@ -252,8 +282,12 @@ export default () => {
                                                         >
                                                             {addToCartLoading() ? <span class="loading loading-spinner"></span> : buttonMessage()}
                                                         </button>
-                                                        <button class="btn btn-outline btn-lg w-full rounded-xl" disabled={item.stock <= 0}>
-                                                            Buy Now
+                                                        <button 
+                                                            class="btn btn-outline btn-lg w-full rounded-xl" 
+                                                            onClick={onBuyNowClick}
+                                                            disabled={buyNowLoading() || item.stock <= 0}
+                                                        >
+                                                            {buyNowLoading() ? <span class="loading loading-spinner"></span> : "Buy Now"}
                                                         </button>
                                                     </div>
                                                 </div>

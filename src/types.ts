@@ -166,3 +166,41 @@ export interface NewReviewResponse {
     message: string;
     data?: Review;
 }
+
+/**
+ * Request body for submitting a checkout via POST /api/checkout
+ */
+export interface CheckoutRequest {
+    name: string;
+    address: string;
+    phone: string;
+    payment_method: string;
+}
+
+/**
+ * Data returned on successful checkout
+ */
+export interface CheckoutData {
+    order_id: number;
+    total_amount: number;
+    item_count: number;
+    created_at: string;
+}
+
+/**
+ * Response wrapper for a successful checkout
+ */
+export interface CheckoutSuccessResponse {
+    success: true;
+    message: string;
+    data: CheckoutData;
+}
+
+/**
+ * Response wrapper for a failed checkout
+ */
+export interface CheckoutErrorResponse {
+    success: false;
+    message: string;
+    error_code: string;
+}

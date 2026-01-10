@@ -73,9 +73,9 @@ export default function OrderSuccess(props: OrderSuccessProps) {
                             <ShoppingBag size={18} />
                             Continue Shopping
                         </A>
-                        <A href="/orders" class="btn btn-outline flex-1">
+                        {/* <A href="/orders" class="btn btn-outline flex-1">
                             View Orders
-                        </A>
+                        </A> */}
                     </div>
 
                     {/* Additional Info */}

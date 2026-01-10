@@ -34,7 +34,7 @@ export default () => {
         if (filters.sortBy !== 'default') {
             params.set('sort', filters.sortBy);
         }
-        
+
         const queryString = params.toString();
         if (queryString) {
             navigate(`/?${queryString}`, { replace: true });
@@ -56,10 +56,10 @@ export default () => {
     return (
         <div class="flex flex-col lg:flex-row min-h-screen bg-base-200">
             {/* Mobile Header & Filter Toggle */}
-            <div class="lg:hidden p-4 bg-base-100 flex flex-col gap-4 sticky top-16 z-30 shadow-sm border-b border-base-300">
+            <div class="lg:hidden p-2 pt-4 bg-base-100 flex flex-col gap-4 sticky top-16 z-30 shadow-sm border-b border-base-300">
                 <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-base-content">Marketplace</h1>
-                    <button 
+                    <h1 class="text-2xl font-bold text-base-content px-2">Marketplace</h1>
+                    <button
                         class={`btn btn-sm rounded-lg font-semibold transition-all ${isFilterOpen() ? 'btn-error' : 'btn-outline'}`}
                         onClick={() => setIsFilterOpen(!isFilterOpen())}
                     >
@@ -67,7 +67,7 @@ export default () => {
                         {isFilterOpen() ? 'Close' : 'Filters'}
                     </button>
                 </div>
-                <div class="overflow-x-auto pb-2 -mx-4 px-4">
+                <div class="overflow-x-auto px-2">
                     <CategoryTabs
                         activeCategory={filters.category}
                         onCategoryChange={(cat) => updateFilter("category", cat)}

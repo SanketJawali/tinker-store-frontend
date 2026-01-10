@@ -3,7 +3,7 @@ import { Palette, Check } from 'lucide-solid';
 
 const DEFAULT_THEME = "lofi"
 
-const THEMES = [
+const BKP_THEMES = [
     { name: "lofi", label: "Lo-Fi", emoji: "🎵" },
     { name: "nord", label: "Nord", emoji: "❄️" },
     { name: "cupcake", label: "Cupcake", emoji: "🧁" },
@@ -16,6 +16,13 @@ const THEMES = [
     { name: "luxury", label: "Luxury", emoji: "👑" },
     { name: "dracula", label: "Dracula", emoji: "🧛" },
     { name: "autumn", label: "Autumn", emoji: "🍂" },
+];
+
+const THEMES = [
+    { name: "lofi", label: "Lo-Fi", emoji: "🎵" },
+    { name: "nord", label: "Nord", emoji: "❄️" },
+    { name: "forest", label: "Forest", emoji: "🌲" },
+    { name: "dracula", label: "Dracula", emoji: "🧛" },
 ];
 
 export default function ThemeSwitcher() {

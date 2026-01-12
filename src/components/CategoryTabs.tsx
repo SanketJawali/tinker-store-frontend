@@ -30,13 +30,13 @@ export default function CategoryTabs(props: CategoryTabsProps) {
                             return (
                                 <a
                                     role="tab"
-                                    class={`tab transition-all duration-200 flex items-center gap-2 font-medium whitespace-nowrap ${props.activeCategory === category.name
+                                    class={`tab transition-all duration-200 flex items-center gap-1 sm:gap-2 font-medium whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 ${props.activeCategory === category.name
                                         ? "tab-active bg-neutral text-neutral-content font-bold shadow-md rounded-xl"
                                         : "text-base-content/70 hover:bg-base-200 rounded-xl"
                                         }`}
                                     onClick={() => props.onCategoryChange(category.name)}
                                 >
-                                    <Icon size={18} class="shrink-0" />
+                                    <Icon size={14} class="shrink-0 sm:w-[18px] sm:h-[18px]" />
                                     <span>{category.name}</span>
                                 </a>
                             );

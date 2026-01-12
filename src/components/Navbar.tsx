@@ -38,7 +38,7 @@ export default () => {
                         <UserButton />
                     </SignedIn>
                     <SignedOut>
-                        <SignInButton class="hidden lg:block">
+                        <SignInButton>
                             <button class='btn btn-primary btn-sm lg:btn-md'>
                                 <LogIn size={18} />
                                 <span class="hidden sm:inline">Sign In</span>

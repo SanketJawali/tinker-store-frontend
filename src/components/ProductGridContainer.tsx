@@ -1,8 +1,7 @@
 import { createResource, createSignal, createEffect, Show } from "solid-js";
 import ProductGrid from "./ProductGrid";
 import { FilterState, ProductListResponse, APIErrorResponse } from "../types";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+import { fetchWithTimeout, parseJsonResponse, BACKEND_URL } from "../lib/api";
 
 const fetchProducts = async ({ page, search }: { page: number; search: string }) => {
     const params = new URLSearchParams({
@@ -14,8 +13,8 @@ const fetchProducts = async ({ page, search }: { page: number; search: string })
         params.append('q', search);
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/product?${params.toString()}`);
-    const data: ProductListResponse | APIErrorResponse = await response.json();
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/product?${params.toString()}`);
+    const data: ProductListResponse | APIErrorResponse = await parseJsonResponse(response);
 
     if (!response.ok || !data.success) {
         throw new Error((data as APIErrorResponse).message || 'Failed to fetch');

@@ -204,3 +204,25 @@ export interface CheckoutErrorResponse {
     message: string;
     error_code: string;
 }
+
+// --- Health Check Interfaces ---
+
+/**
+ * Backend health check response structure from GET /
+ */
+export interface HealthCheckResponse {
+    status: string;
+    uptime_seconds: number;
+    database: {
+        ok: boolean;
+        error: string | null;
+    };
+    cache: {
+        ok: boolean;
+        error: string | null;
+        hits?: number;
+        misses?: number;
+        total?: number;
+        hit_rate_pct?: number;
+    };
+}

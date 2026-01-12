@@ -8,9 +8,9 @@ import {
   ImageKitUploadNetworkError
 } from '@imagekit/javascript';
 import { ProductRequest, SingleProductResponse, APIErrorResponse } from '../types';
+import { fetchWithTimeout, parseJsonResponse, BACKEND_URL } from './api';
 
 const PUBLIC_KEY = import.meta.env.VITE_IMAGE_KIT_PUBLIC_KEY;
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
 interface ImageKitAuthResponse {
   token: string;
@@ -19,7 +19,7 @@ interface ImageKitAuthResponse {
 }
 
 async function getSignature(authToken: string): Promise<ImageKitAuthResponse> {
-  const res = await fetch(`${BACKEND_URL}/api/cdn-auth`, {
+  const res = await fetchWithTimeout(`${BACKEND_URL}/api/cdn-auth`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${authToken}` // Header added here
@@ -30,7 +30,7 @@ async function getSignature(authToken: string): Promise<ImageKitAuthResponse> {
     throw new Error(`Failed to get ImageKit signature. Status: ${res.status}`);
   }
 
-  const data: ImageKitAuthResponse = await res.json();
+  const data: ImageKitAuthResponse = await parseJsonResponse(res);
   return data;
 }
 
@@ -88,7 +88,7 @@ export async function createProduct(
   };
 
   // 2. Post to Backend (needs auth for protection)
-  const res = await fetch(`${BACKEND_URL}/api/product`, {
+  const res = await fetchWithTimeout(`${BACKEND_URL}/api/product`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -97,7 +97,7 @@ export async function createProduct(
     body: JSON.stringify(finalPayload)
   });
 
-  const data: SingleProductResponse | APIErrorResponse = await res.json().catch(() => ({}));
+  const data: SingleProductResponse | APIErrorResponse = await parseJsonResponse(res).catch(() => ({} as APIErrorResponse));
 
   if (!res.ok || !data.success) {
     const errorData = data as APIErrorResponse;

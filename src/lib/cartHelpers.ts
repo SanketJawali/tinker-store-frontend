@@ -1,6 +1,5 @@
 import { NewCartItem, NewCartItemWrapper } from "../types";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+import { fetchWithTimeout, parseJsonResponse, BACKEND_URL } from './api';
 
 export async function addToCart(data: NewCartItem, authToken: string): Promise<NewCartItemWrapper | null> {
     // Debug: Log what we are sending to ensure token is a string and data is correct
@@ -12,7 +11,7 @@ export async function addToCart(data: NewCartItem, authToken: string): Promise<N
     });
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/cart`, {
+        const response = await fetchWithTimeout(`${BACKEND_URL}/api/cart`, {
             method: "POST",
             body: JSON.stringify(data),
             headers: {
@@ -25,7 +24,7 @@ export async function addToCart(data: NewCartItem, authToken: string): Promise<N
             // Try to parse error, fallback to text if JSON fails
             let errorData;
             try {
-                errorData = await response.json();
+                errorData = await parseJsonResponse(response);
             } catch (e) {
                 errorData = await response.text();
             }
@@ -34,7 +33,7 @@ export async function addToCart(data: NewCartItem, authToken: string): Promise<N
             return null;
         }
 
-        return await response.json();
+        return await parseJsonResponse(response);
     } catch (error) {
         console.error("Network error adding to cart:", error);
         return null;

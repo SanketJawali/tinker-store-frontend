@@ -8,9 +8,7 @@ import ReviewSection from '../components/Reviews';
 import ReviewForm from '../components/ReviewForm';
 import { Product, SingleProductResponse, NewCartItem, Review } from '../types';
 import { addToCart } from "../lib/cartHelpers";
-
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+import { fetchWithTimeout, parseJsonResponse, BACKEND_URL } from '../lib/api';
 
 interface ProductWithReviews {
     product: Product;
@@ -19,13 +17,13 @@ interface ProductWithReviews {
 
 // --- Fetchers ---
 const fetchProduct = async (id: string): Promise<ProductWithReviews> => {
-    const response = await fetch(`${BACKEND_URL}/api/product/${id}`);
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/product/${id}`);
 
     if (!response.ok) {
         throw new Error(`Failed to fetch product: ${response.statusText}`);
     }
 
-    const json: SingleProductResponse = await response.json();
+    const json: SingleProductResponse = await parseJsonResponse(response);
     console.log("Fetched product:", json);
 
     if (!json.success || !json.data) {

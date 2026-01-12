@@ -12,38 +12,18 @@ import {
     APIErrorResponse,
     CheckoutData
 } from "../types";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
-
-// Toast notification helper
-const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `alert alert-${type} shadow-lg fixed top-20 right-4 z-50 max-w-sm animate-slide-in`;
-    toast.innerHTML = `
-        <div>
-            <span>${message}</span>
-        </div>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // Remove after 4 seconds
-    setTimeout(() => {
-        toast.classList.add('animate-slide-out');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-};
+import { fetchWithTimeout, parseJsonResponse, BACKEND_URL, CRITICAL_TIMEOUT } from '../lib/api';
+import { showToast } from '../lib/toast';
 
 const fetchCart = async (token: string) => {
-    const response = await fetch(`${BACKEND_URL}/api/cart`, {
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/cart`, {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         },
     });
 
-    const data: CartListWrapper | APIErrorResponse = await response.json();
+    const data: CartListWrapper | APIErrorResponse = await parseJsonResponse(response);
 
     if (!response.ok || !data.success) {
         throw new Error((data as APIErrorResponse).message || 'Failed to fetch cart');
@@ -97,16 +77,17 @@ export default function Checkout() {
         setCheckoutLoading(true);
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/checkout`, {
+            const response = await fetchWithTimeout(`${BACKEND_URL}/api/checkout`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify(checkoutData)
+                body: JSON.stringify(checkoutData),
+                timeout: CRITICAL_TIMEOUT, // Use longer timeout for checkout
             });
 
-            const data: CheckoutSuccessResponse | CheckoutErrorResponse = await response.json();
+            const data: CheckoutSuccessResponse | CheckoutErrorResponse = await parseJsonResponse(response);
 
             if (response.ok && data.success) {
                 // Success

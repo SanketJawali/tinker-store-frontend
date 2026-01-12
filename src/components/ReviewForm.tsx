@@ -2,8 +2,7 @@ import { createSignal, Show, For } from "solid-js";
 import { useSession } from "clerk-solidjs";
 import { NewReviewRequest, NewReviewResponse, APIErrorResponse, Review } from "../types";
 import { X, Star } from "lucide-solid";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+import { fetchWithTimeout, parseJsonResponse, BACKEND_URL } from '../lib/api';
 
 interface ReviewFormProps {
     productId: number;
@@ -110,7 +109,7 @@ export default function ReviewForm(props: ReviewFormProps) {
                 content: content().trim(),
             };
 
-            const response = await fetch(`${BACKEND_URL}/api/review`, {
+            const response = await fetchWithTimeout(`${BACKEND_URL}/api/review`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -119,7 +118,7 @@ export default function ReviewForm(props: ReviewFormProps) {
                 body: JSON.stringify(reviewData),
             });
 
-            const data: NewReviewResponse | APIErrorResponse = await response.json();
+            const data: NewReviewResponse | APIErrorResponse = await parseJsonResponse(response);
 
             if (!response.ok || data.success === false) {
                 const errorData = data as APIErrorResponse;

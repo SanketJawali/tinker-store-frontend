@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router"
-import { Home, Info, Mail, ShoppingBag } from 'lucide-solid';
+import { Home, Info, Mail, ShoppingBag, ShieldCheck, FileText } from 'lucide-solid';
 
 export default () => {
     return (
@@ -10,8 +10,9 @@ export default () => {
                     <span class="text-xl font-bold text-base-content">Tinker Store</span>
                 </div>
                 <p class="text-sm text-base-content/70">
-                    Your marketplace for quality products
+                    Personal demo marketplace project
                 </p>
+                <p class="badge badge-outline badge-warning mt-2">Demo Only</p>
                 <p class="text-xs text-base-content/50 mt-1">
                     Copyright © {new Date().getFullYear()} - All rights reserved
                 </p>
@@ -29,6 +30,14 @@ export default () => {
                 <A class="link link-hover flex items-center gap-2 text-base-content/70 hover:text-primary" href="/contact">
                     <Mail size={16} />
                     Contact
+                </A>
+                <A class="link link-hover flex items-center gap-2 text-base-content/70 hover:text-primary" href="/terms">
+                    <FileText size={16} />
+                    Terms of Service
+                </A>
+                <A class="link link-hover flex items-center gap-2 text-base-content/70 hover:text-primary" href="/privacy">
+                    <ShieldCheck size={16} />
+                    Privacy Policy
                 </A>
             </nav>
         </footer>

@@ -91,7 +91,12 @@ export default () => {
             {/* Mobile Header & Filter Toggle */}
             <div class="lg:hidden p-2 pt-4 bg-base-100 flex flex-col gap-3 sticky top-16 z-30 shadow-sm border-b border-base-300">
                 <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-base-content px-2">Marketplace</h1>
+                        <div class="px-2">
+                            <h1 class="text-2xl font-bold text-base-content">Marketplace</h1>
+                            <p class="text-xs text-base-content/70">
+                                Demo listings only
+                            </p>
+                        </div>
                     <button
                         class={`btn btn-sm rounded-lg font-semibold transition-all ${isFilterOpen() ? 'btn-error' : 'btn-outline'}`}
                         onClick={() => setIsFilterOpen(!isFilterOpen())}
@@ -153,7 +158,13 @@ export default () => {
             <main class="flex-1 p-4 lg:p-8">
                 <div class="hidden lg:flex flex-col gap-6 mb-8">
                     <div class="flex justify-between items-center">
-                        <h1 class="text-4xl font-bold text-base-content">Marketplace</h1>
+                        <div>
+                            <h1 class="text-4xl font-bold text-base-content">Marketplace</h1>
+                            <p class="text-base-content/70 mt-2 max-w-2xl">
+                                Explore sample products in this personal demo ecommerce project. Listings and prices are
+                                for showcase purposes only.
+                            </p>
+                        </div>
                     </div>
                     <CategoryTabs
                         activeCategory={filters.category}

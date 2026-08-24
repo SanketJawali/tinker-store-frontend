@@ -4,7 +4,6 @@ import 'solid-devtools';
 import { Router, Route } from '@solidjs/router';
 import { ClerkProvider } from 'clerk-solidjs'
 import { Suspense } from 'solid-js';
-import { Link, MetaProvider } from '@solidjs/meta'
 
 import Navbar from './components/Navbar';
 import Store from './pages/Store';
@@ -15,6 +14,9 @@ import Cart from './pages/Cart';
 import NewItemForm from './pages/NewItemForm';
 import ItemInfo from './pages/ItemInfo';
 import Checkout from './pages/Checkout';
+import SeoHead from './components/SeoHead';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 const root = document.getElementById('root');
 
@@ -36,7 +38,13 @@ const Layout = (props: any) => {
     return (
         <>
             <Suspense>
+                <SeoHead />
                 <Navbar />
+                <div class="alert rounded-none border-x-0 border-base-300 bg-warning/20 text-warning-content">
+                    <span class="text-sm">
+                        Demo personal project: products, pricing, and checkout are for demonstration only and are not for real purchases.
+                    </span>
+                </div>
                 {props.children}
                 <Footer />
             </Suspense>
@@ -55,6 +63,8 @@ render(() =>
                 <Route path="/product/:id" component={ItemInfo} />
                 <Route path="/new-product" component={NewItemForm} />
                 <Route path="/checkout" component={Checkout} />
+                <Route path="/terms" component={TermsOfService} />
+                <Route path="/privacy" component={PrivacyPolicy} />
             </Router>
         </ClerkProvider>
     </>

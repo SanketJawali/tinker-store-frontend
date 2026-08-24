@@ -4,16 +4,48 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <title>Tinker Store</title>
+    <meta name="theme-color" content="#0f172a" />
+    <title>Tinker Store - Demo Marketplace</title>
+    <meta name="description"
+        content="Tinker Store is a demo ecommerce app built as a personal project with SolidJS and a Python API. Browse sample products, cart, checkout flow, and reviews." />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Tinker Store Project" />
+    <link rel="canonical" href="https://tinkerstore.tech/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Tinker Store - Demo Marketplace" />
+    <meta property="og:description"
+        content="A personal demo project showcasing a modern store frontend with catalog, cart, checkout, and product details." />
+    <meta property="og:url" content="https://tinkerstore.tech/" />
+    <meta property="og:site_name" content="Tinker Store" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Tinker Store - Demo Marketplace" />
+    <meta name="twitter:description"
+        content="Personal project demo store built with SolidJS and a Python API." />
     <link href="/src/index.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="dns-prefetch" href="http://localhost:8000" />
-    <link rel="preconnect" href="http://localhost:8000" crossorigin>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Tinker Store",
+      "url": "https://tinkerstore.tech/",
+      "description": "Demo ecommerce app built as a personal project.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://tinkerstore.tech/?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <link rel="dns-prefetch" href="https://api.tinkerstore.tech" />
+    <link rel="preconnect" href="https://api.tinkerstore.tech" crossorigin>
 </head>
 
 <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>
+        Tinker Store is a personal demo ecommerce project. JavaScript is required to browse products, cart, and checkout.
+        Please enable JavaScript to use the site.
+    </noscript>
     <div id="root"></div>
 
     <script src="/src/index.tsx" type="module"></script>
